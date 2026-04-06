@@ -1,5 +1,11 @@
  # Geopolitical Thesis & Sovereign AI: The SOH Architecture v2.0
 **Strategic, Legal, and Engineering Framework for the USA-Western Hemisphere Technological Corridor (2026).**
+🛠️ Technical Validation & Roadmap (SOH v2.0)
+The Sovereign Operations Hub (SOH v2.0) is currently undergoing rigorous stochastic testing. Recent peer review by Code Master (Diana) has led to critical architectural refinements:
+Dynamic Entropy Calibration: Moving away from fixed thresholds (e.g., 0.85) to a Calibration Phase model. The baseline is now derived from the model’s natural output layer behavior (current stable entropy observed at ~1.84).
+Multi-Tier Fallback Logic (Warning Zone): Implementation of a "Warning Zone" buffer to prevent unnecessary system switches. This ensures operational stability by allowing for normal variation before triggering a full architectural fallback.
+Contextual Event Schema: Enhancing the Metabolic Event Schema to include task-type metadata (e.g., Reasoning vs. Data Extraction), ensuring that entropy spikes are interpreted within the correct operational context.
+Divergence Validation: Simplified flow for immediate stochastic auditing, ensuring the system behaves consistently across diverse mission-critical inputs.
 
 ## 🏛️ OVERVIEW
 This repository documents the evolution of **Self-Organizing Homeostasis (SOH)**, a proprietary framework designed to transform AI systems into resilient, legally auditable, and mission-ready infrastructure. 
