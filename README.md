@@ -43,6 +43,8 @@ The framework has been upgraded to a verifiable technical specification for **So
 *   `SOH_entropy_monitor.py`: Functional Python prototype for metabolic stress monitoring.
 *   `Geopolitical_Thesis_Brazil_2026_EN.pdf`: Strategic roadmap for the Brazil-US Hub.
 *   `SOH_Production_Framework_Technical_Spec.pdf`: Mathematical implementation of homeostatic ranges.
+*   * SOH_v2_Technical_Audit_2026.pdf: Analysis of the stochastic calibration audit and peer review refinements.
+
 
 ---
 
