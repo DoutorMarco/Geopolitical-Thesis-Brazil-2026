@@ -8,6 +8,10 @@ Multi-Tier Fallback Logic (Warning Zone): Implementation of a "Warning Zone" buf
 Contextual Event Schema: Enhancing the Metabolic Event Schema to include task-type metadata (e.g., Reasoning vs. Data Extraction), ensuring that entropy spikes are interpreted within the correct operational context.
 Divergence Validation: Simplified flow for immediate stochastic auditing, ensuring the system behaves consistently across diverse mission-critical inputs.
 
+ 2. Multi-Tier Fallback & Hysteresis Control
+Implementation: Introduced a Stochastic Buffer with Hysteresis Logic to prevent rapid state switching ("flapping").
+Functionality: By implementing a lag-based transition between the "Warning Zone" and "Full Fallback," the SOH v2.0 ensures that minor noise doesn't trigger unnecessary architectural shifts. This stabilizes the system's "Digital Physiology" under high-load interference.
+
 ## 🏛️ OVERVIEW
 This repository documents the evolution of **Self-Organizing Homeostasis (SOH)**, a proprietary framework designed to transform AI systems into resilient, legally auditable, and mission-ready infrastructure. 
 
