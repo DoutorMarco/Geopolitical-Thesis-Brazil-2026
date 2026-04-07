@@ -38,15 +38,40 @@ The framework has been upgraded to a verifiable technical specification for **So
 
 ---
 
-## 📂 REPOSITORY STRUCTURE
-*   `SOH_v2_Architectural_White_Paper_2026_EN.pdf`: Full technical specification in English.
-*   `SOH_entropy_monitor.py`: Functional Python prototype for metabolic stress monitoring.
-*   `Geopolitical_Thesis_Brazil_2026_EN.pdf`: Strategic roadmap for the Brazil-US Hub.
-*   `SOH_Production_Framework_Technical_Spec.pdf`: Mathematical implementation of homeostatic ranges.
-*   * SOH_v2_Technical_Audit_2026.pdf: Analysis of the stochastic calibration audit and peer review refinements.
+ 📂 REPOSITORY STRUCTURE & ASSETS (v2.0-STABLE)
+
+### 📄 White Papers & Technical Reports
+- **Homeostatic_Synchrony_SOH_v2.pdf**: Official manuscript on 18/6 Neural Resilience and Silicon Physiology.
+- **SOH_v2_Architectural_White_Paper_2026_EN.pdf**: Full technical specification for mission-critical AI.
+- **SOH_v2_Technical_Audit_2026.pdf**: Forensic analysis of stochastic calibration and Shannon Entropy implementation.
+
+### 🛠️ Engineering & Automation (The Master Stack)
+- **scripts/SOH_v2_Master_Script.py**: Master orchestration script for automated SOH v2.0 ecosystem deployment.
+- **SOH_entropy_monitor.py**: Functional prototype for real-time metabolic stress monitoring at the softmax layer.
+- **pdf_generator.py**: Utility for generating on-the-fly technical documentation for forensic auditing.
+
+### 📊 Telemetry & Visual Evidence
+- **SOH_v2_Telemetry.mp4**: Real-time stress test validation of the Silicon Pain Reflex (Hardware-Anchored Block).
+- **SOH_v2_Reliability_Gap.png**: Comparative chart showing the deterministic advantage of SOH v2.0 vs. Legacy AI.
+- **carbon.png**: High-definition JSON Blueprint of the SOH v2.0 Architecture for hardware implementation.
+
+### 🏛️ Geopolitical & Legal Framework
+- **Geopolitical_Thesis_Brazil_2026_EN.pdf**: Strategic roadmap for the Alcântara-SpaceX Hub and the Brazil-US Technological Corridor.
+- **Tese_Geopolitica_Brasil_2026_PT.pdf**: Versão oficial em Português da Tese Geopolítica e Soberania Digital.
 
 
 ---
 
 ## 🚀 STRATEGIC GOAL
+
+---
+
+## 🛠️ HOW TO RUN: SOH v2.0 AUDIT & SIMULATION
+
+To validate the **SOH v2.0 Deterministic Framework** and generate the mission-critical assets, follow these steps in a Python 3.10+ environment:
+
+### 1. Clone the Sovereign Repository
+```bash
+git clone https://github.com
+cd Geopolitical-Thesis-Brazil-2026
 To provide the **Sovereign AI Infrastructure** for the Western Hemisphere, transforming legal liability into operational resilience. Our goal is to ensure that AI systems in the **Alcântara-SpaceX Corridor** are not only high-performing but physically incapable of deceptive "hallucinations."
