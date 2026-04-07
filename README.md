@@ -44,6 +44,8 @@ The framework has been upgraded to a verifiable technical specification for **So
 - **Homeostatic_Synchrony_SOH_v2.pdf**: Official manuscript on 18/6 Neural Resilience and Silicon Physiology.
 - **SOH_v2_Architectural_White_Paper_2026_EN.pdf**: Full technical specification for mission-critical AI.
 - **SOH_v2_Technical_Audit_2026.pdf**: Forensic analysis of stochastic calibration and Shannon Entropy implementation.
+- ### ⚖️ Legal & Forensic Compliance
+- **SOH_v2_Forensic_Manual.pdf**: Methodology for judicial experts to validate hardware-anchored AI decisions.
 
 ### 🛠️ Engineering & Automation (The Master Stack)
 - **scripts/SOH_v2_Master_Script.py**: Master orchestration script for automated SOH v2.0 ecosystem deployment.
