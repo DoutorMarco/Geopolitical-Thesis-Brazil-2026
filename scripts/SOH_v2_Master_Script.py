@@ -1,65 +1,70 @@
- # ==============================================================================
-# SOH v2.0 - MASTER SCRIPT WITH HARDWARE-ANCHORED HALT
-# Author: Dr. Marco Antônio | Principal Data Architect
-# Integration: JSON Thermal Limit -> Software Metabolic Halt
-# ==============================================================================
-
 import os
 import json
 import numpy as np
 from twilio.rest import Client
+from sklearn.linear_model import SGDRegressor
+from sklearn.preprocessing import StandardScaler
 
 class SovereignEngine:
     def __init__(self):
-        # 1. Carrega o Limite Térmico do JSON de Arquitetura
+        # Núcleo de IA
+        self.model = SGDRegressor(max_iter=1000, tol=1e-3, learning_rate='constant', eta0=0.5)
+        self.scaler = StandardScaler()
+        self.is_fitted = False
+        
+        # 1. Carrega as regras de Hardware do SOH v2.0 (JSON)
         try:
             with open('SOH_v2_Architecture.json', 'r') as f:
                 config = json.load(f)
             self.thermal_limit = config.get('sigma_threshold', 1.36)
-        except Exception:
-            self.thermal_limit = 1.36 # Fallback de segurança caso o JSON falte
-        
-        self.weights = np.array([0.25, 0.25, 0.25, 0.25])
-        print(f"--- Sistema SOH v2.0 Ativo | Limite Térmico: {self.thermal_limit} ---")
+        except:
+            self.thermal_limit = 1.36 # Fallback de segurança
 
-    def run_calibration(self, vector, real_impact, sensor_impedance):
+    def run_calibration(self, features, real_impact, current_impedance):
         """
-        Executa a calibração, mas força o HALT se o hardware detectar impedância crítica.
+        Integração Hardware-Software: Força o Metabolic Halt se houver impedância crítica.
         """
-        # 2. Verificação de Integridade Física (O 'Metabolic Halt' que você pediu)
-        if sensor_impedance > self.thermal_limit:
-            halt_msg = f"[🚨 METABOLIC HALT] Impedância Crítica ({sensor_impedance}) detectada. Bloqueio de Software Ativado."
-            print(halt_msg)
-            self.send_emergency_alert(halt_msg)
-            return None # O sistema para o processamento aqui
+        # 2. Monitoramento de impedância (Sensor de Hardware)
+        if current_impedance > self.thermal_limit:
+            msg = f"[🚨 METABOLIC HALT] Impedância Crítica: {current_impedance}. Sistema Bloqueado."
+            print(msg)
+            self.send_emergency_alert(msg)
+            return None # O software para de processar aqui (Halt)
 
-        # 3. Processamento normal se estiver dentro dos limites
-        prediction = np.dot(vector, self.weights)
-        error = real_impact - prediction
-        self.weights += 0.1 * error * vector
-        return np.dot(vector, self.weights)
+        # 3. Processamento normal
+        X = np.array(features).reshape(1, -1)
+        if not self.is_fitted:
+            self.scaler.fit(X)
+            self.model.partial_fit(self.scaler.transform(X), [0.5])
+            self.is_fitted = True
+            
+        X_scaled = self.scaler.transform(X)
+        self.model.partial_fit(X_scaled, [real_impact])
+        return self.model.predict(X_scaled)
 
     def send_emergency_alert(self, message):
-        """Alerta de emergência via WhatsApp Secrets"""
+        """Dispara o alerta para o seu WhatsApp via GitHub Secrets"""
         sid = os.environ.get('TWILIO_ACCOUNT_SID')
         token = os.environ.get('TWILIO_AUTH_TOKEN')
         if sid and token:
             client = Client(sid, token)
             client.messages.create(
                 from_='whatsapp:+14155238886',
-                body=f"*ALERTA DE SEGURANÇA SOH v2.0*\n\n{message}",
+                body=f"*ALERTA SOH v2.0*\n\n{message}",
                 to='whatsapp:+5521964316825'
             )
 
-# --- SIMULAÇÃO DE NÍVEL SÊNIOR ---
+# --- EXECUÇÃO COM TRAVA DE SEGURANÇA ---
 if __name__ == "__main__":
     engine = SovereignEngine()
     
-    # Simulação: Sensor detecta 1.50 de impedância (Limite no JSON é 1.36)
-    sensor_input = 1.50 
-    vetor_dados = np.array([0.95, 0.80, 0.88, 0.70])
+    # Simulação: Sensor detecta impedância de 1.50 (Limite é 1.36)
+    impedance_sensor = 1.50 
+    input_data = [0.95, 0.82, 0.90, 0.75]
     
-    resultado = engine.run_calibration(vetor_dados, 0.98, sensor_input)
+    impact = engine.run_calibration(input_data, 0.92, impedance_sensor)
     
-    if resultado is None:
-        print("SISTEMA BLOQUEADO PARA PRESERVAR INTEGRAÇÃO DE DADOS.")
+    if impact is None:
+        print("Protocolo de Emergência: Hardware-Anchored Physiology Blocked.")
+    else:
+        print(f"Impacto calculado com segurança: {impact}")
