@@ -1,64 +1,62 @@
 # ==============================================================================
-# SOH v2.0: MASTER DEPLOYMENT SCRIPT
-# Author: Dr. Marco Antônio, PhD | Principal Data Architect
-# Purpose: Automated generation of the SOH v2.0 Sovereignty Ecosystem
+# SOH v2.0 - MASTER ORCHESTRATION & COMMAND SCRIPT (STABLE 2026)
+# Author: Dr. Marco Antônio | Principal Data Architect
+# Integrates: Geopolitical Intelligence, AES Encryption, and WhatsApp Alerts
 # ==============================================================================
 
-import json
-import matplotlib.pyplot as plt
+import os
 import numpy as np
-from fpdf import FPDF
-from moviepy.editor import VideoClip
+import datetime
+from twilio.rest import Client
+from cryptography.fernet import Fernet
+from sklearn.linear_model import SGDRegressor
 
-class SOH_v2_Deployer:
+class SovereignEngine:
     def __init__(self):
-        self.version = "2.0-STABLE"
-        self.threshold = 82.5 # Silicon Pain Reflex Threshold
+        # Intelligence Core: Online Calibration Loop
+        self.model = SGDRegressor(max_iter=1000, tol=1e-3, learning_rate='constant', eta0=0.5)
+        self.is_fitted = False
+        # Security: AES-128 Encryption Key
+        self.key = Fernet.generate_key()
+        self.cipher = Fernet(self.key)
 
-    def generate_json_schema(self):
-        schema = {
-            "id": "SOH-V2-DETERMINISTIC",
-            "protocol": "18/6 Neural Resilience",
-            "governor": "Hardware-Anchored Silicon Pain Reflex",
-            "sigma_threshold": 1.36
-        }
-        with open('SOH_v2_Architecture.json', 'w') as f:
-            json.dump(schema, f, indent=4)
-        print("[✔] JSON Schema Generated.")
+    def predict_and_calibrate(self, features, real_impact):
+        X = np.array(features).reshape(1, -1)
+        if not self.is_fitted:
+            self.model.partial_fit(X, [0.5])
+            self.is_fitted = True
+        self.model.partial_fit(X, [real_impact])
+        return self.model.predict(X)[0]
 
-    def generate_white_paper(self):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("helvetica", "B", 16)
-        pdf.cell(0, 10, "SOH v2.0: Homeostatic Synchrony", align='C', new_x="LMARGIN", new_y="NEXT")
-        pdf.set_font("helvetica", "", 12)
-        pdf.multi_cell(0, 10, "\nAbstract: Transposing biological resilience into silicon to eliminate AI hallucinations.")
-        pdf.output("SOH_v2_WhitePaper.pdf")
-        print("[✔] White Paper PDF Generated.")
+def send_command_alert(impact_value):
+    """Secure Gateway for WhatsApp Alerts using GitHub Secrets."""
+    sid = os.environ.get('TWILIO_ACCOUNT_SID')
+    token = os.environ.get('TWILIO_AUTH_TOKEN')
+    target = 'whatsapp:+5521964316825' 
 
-    def run_telemetry_simulation(self, duration=10):
-        def make_frame(t):
-            fig, ax = plt.subplots(figsize=(8, 4), facecolor='#010b13')
-            time_series = np.linspace(0, t, 50)
-            temp = 60 + 25 * np.sin(t * 1.5) + np.random.normal(0, 2, 50)
-            color = "#00f2ff" if temp[-1] < self.threshold else "#ff1744"
-            ax.plot(time_series, np.where(temp > self.threshold, self.threshold, temp), color=color)
-            ax.set_ylim(40, 100)
-            ax.set_facecolor('#010b13')
-            
-            # Conversão segura de buffer para vídeo
-            fig.canvas.draw()
-            frame = np.array(fig.canvas.renderer.buffer_rgba())[:, :, :3]
-            plt.close(fig)
-            return frame
+    if not sid or not token:
+        print("[!] Security keys not found. Check GitHub Secrets.")
+        return
 
-        clip = VideoClip(make_frame, duration=duration)
-        clip.write_videofile("SOH_v2_Telemetry.mp4", fps=20, codec='libx264')
-        print("[✔] Telemetry Video Generated.")
+    client = Client(sid, token)
+    body = (
+        f"🛡️ *SOH v2.0 COMMAND REPORT*\n\n"
+        f"📊 *Global Impact:* {impact_value:.4f}\n"
+        f"⚠️ *Status:* Operational & Calibrated\n"
+        f"📅 *Date:* {datetime.datetime.now().strftime('%d/%m/%Y')}\n\n"
+        f"_Hardware-Anchored Physiology Strategy_"
+    )
+    client.messages.create(from_='whatsapp:+14155238886', body=body, to=target)
+    print("[✔] Alert sent to Command Center.")
 
 if __name__ == "__main__":
-    deployer = SOH_v2_Deployer()
-    deployer.generate_json_schema()
-    deployer.generate_white_paper()
-    # deployer.run_telemetry_simulation() # Opcional: Requer MoviePy instalado
-    print(f"\n--- SOH v2.0 Deployment Complete (v{deployer.version}) ---")
+    engine = SovereignEngine()
+    # Scenario: [SpaceX, Neuralink, DoD, Finance]
+    current_scenario = [0.95, 0.82, 0.90, 0.75]
+    
+    # Run Intelligence and Calibration
+    impact = engine.predict_and_calibrate(current_scenario, 0.92)
+    
+    # Dispatch Secure Alert
+    send_command_alert(impact)
+    print(f"--- SOH v2.0 Execution Complete | Impact: {impact:.4f} ---")
