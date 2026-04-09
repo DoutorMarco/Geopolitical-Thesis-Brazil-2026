@@ -1,62 +1,65 @@
-# ==============================================================================
-# SOH v2.0 - MASTER ORCHESTRATION & COMMAND SCRIPT (STABLE 2026)
+ # ==============================================================================
+# SOH v2.0 - MASTER SCRIPT WITH HARDWARE-ANCHORED HALT
 # Author: Dr. Marco Antônio | Principal Data Architect
-# Integrates: Geopolitical Intelligence, AES Encryption, and WhatsApp Alerts
+# Integration: JSON Thermal Limit -> Software Metabolic Halt
 # ==============================================================================
 
 import os
+import json
 import numpy as np
-import datetime
 from twilio.rest import Client
-from cryptography.fernet import Fernet
-from sklearn.linear_model import SGDRegressor
 
 class SovereignEngine:
     def __init__(self):
-        # Intelligence Core: Online Calibration Loop
-        self.model = SGDRegressor(max_iter=1000, tol=1e-3, learning_rate='constant', eta0=0.5)
-        self.is_fitted = False
-        # Security: AES-128 Encryption Key
-        self.key = Fernet.generate_key()
-        self.cipher = Fernet(self.key)
+        # 1. Carrega o Limite Térmico do JSON de Arquitetura
+        try:
+            with open('SOH_v2_Architecture.json', 'r') as f:
+                config = json.load(f)
+            self.thermal_limit = config.get('sigma_threshold', 1.36)
+        except Exception:
+            self.thermal_limit = 1.36 # Fallback de segurança caso o JSON falte
+        
+        self.weights = np.array([0.25, 0.25, 0.25, 0.25])
+        print(f"--- Sistema SOH v2.0 Ativo | Limite Térmico: {self.thermal_limit} ---")
 
-    def predict_and_calibrate(self, features, real_impact):
-        X = np.array(features).reshape(1, -1)
-        if not self.is_fitted:
-            self.model.partial_fit(X, [0.5])
-            self.is_fitted = True
-        self.model.partial_fit(X, [real_impact])
-        return self.model.predict(X)[0]
+    def run_calibration(self, vector, real_impact, sensor_impedance):
+        """
+        Executa a calibração, mas força o HALT se o hardware detectar impedância crítica.
+        """
+        # 2. Verificação de Integridade Física (O 'Metabolic Halt' que você pediu)
+        if sensor_impedance > self.thermal_limit:
+            halt_msg = f"[🚨 METABOLIC HALT] Impedância Crítica ({sensor_impedance}) detectada. Bloqueio de Software Ativado."
+            print(halt_msg)
+            self.send_emergency_alert(halt_msg)
+            return None # O sistema para o processamento aqui
 
-def send_command_alert(impact_value):
-    """Secure Gateway for WhatsApp Alerts using GitHub Secrets."""
-    sid = os.environ.get('TWILIO_ACCOUNT_SID')
-    token = os.environ.get('TWILIO_AUTH_TOKEN')
-    target = 'whatsapp:+5521964316825' 
+        # 3. Processamento normal se estiver dentro dos limites
+        prediction = np.dot(vector, self.weights)
+        error = real_impact - prediction
+        self.weights += 0.1 * error * vector
+        return np.dot(vector, self.weights)
 
-    if not sid or not token:
-        print("[!] Security keys not found. Check GitHub Secrets.")
-        return
+    def send_emergency_alert(self, message):
+        """Alerta de emergência via WhatsApp Secrets"""
+        sid = os.environ.get('TWILIO_ACCOUNT_SID')
+        token = os.environ.get('TWILIO_AUTH_TOKEN')
+        if sid and token:
+            client = Client(sid, token)
+            client.messages.create(
+                from_='whatsapp:+14155238886',
+                body=f"*ALERTA DE SEGURANÇA SOH v2.0*\n\n{message}",
+                to='whatsapp:+5521964316825'
+            )
 
-    client = Client(sid, token)
-    body = (
-        f"🛡️ *SOH v2.0 COMMAND REPORT*\n\n"
-        f"📊 *Global Impact:* {impact_value:.4f}\n"
-        f"⚠️ *Status:* Operational & Calibrated\n"
-        f"📅 *Date:* {datetime.datetime.now().strftime('%d/%m/%Y')}\n\n"
-        f"_Hardware-Anchored Physiology Strategy_"
-    )
-    client.messages.create(from_='whatsapp:+14155238886', body=body, to=target)
-    print("[✔] Alert sent to Command Center.")
-
+# --- SIMULAÇÃO DE NÍVEL SÊNIOR ---
 if __name__ == "__main__":
     engine = SovereignEngine()
-    # Scenario: [SpaceX, Neuralink, DoD, Finance]
-    current_scenario = [0.95, 0.82, 0.90, 0.75]
     
-    # Run Intelligence and Calibration
-    impact = engine.predict_and_calibrate(current_scenario, 0.92)
+    # Simulação: Sensor detecta 1.50 de impedância (Limite no JSON é 1.36)
+    sensor_input = 1.50 
+    vetor_dados = np.array([0.95, 0.80, 0.88, 0.70])
     
-    # Dispatch Secure Alert
-    send_command_alert(impact)
-    print(f"--- SOH v2.0 Execution Complete | Impact: {impact:.4f} ---")
+    resultado = engine.run_calibration(vetor_dados, 0.98, sensor_input)
+    
+    if resultado is None:
+        print("SISTEMA BLOQUEADO PARA PRESERVAR INTEGRAÇÃO DE DADOS.")
