@@ -1,70 +1,52 @@
-import os
-import json
 import numpy as np
-from twilio.rest import Client
-from sklearn.linear_model import SGDRegressor
-from sklearn.preprocessing import StandardScaler
+import asyncio
+import hashlib
+import hmac
+from collections import deque
+from datetime import datetime
 
 class SovereignEngine:
-    def __init__(self):
-        # Núcleo de IA
-        self.model = SGDRegressor(max_iter=1000, tol=1e-3, learning_rate='constant', eta0=0.5)
-        self.scaler = StandardScaler()
-        self.is_fitted = False
+    """
+    SOH v2.1 - Master Control Engine
+    Integridade Criptográfica & Defesa Fisiológica de Hardware
+    """
+    def __init__(self, tau_threshold=2.5, window_size=100):
+        self.threshold = 1.36  # Limite Sigma de Hardware
+        self.tau = tau_threshold
+        self.data_buffer = deque([0.8, 0.9, 0.85], maxlen=window_size)
+        self.secret_key = b"GEO-BRAZIL-2026-SECRET-KEY"
+        self.is_halted = False
+
+    def _generate_integrity_seal(self, impedance, impact):
+        payload = f"{impedance}|{impact}|{datetime.now().isoformat()}"
+        return hmac.new(self.secret_key, payload.encode(), hashlib.sha256).hexdigest()
+
+    def check_hardware_physiology(self, current_impedance):
+        if current_impedance > self.threshold:
+            self.is_halted = True
+            return False
+        return True
+
+    def calculate_z_score(self, value):
+        if len(self.data_buffer) < 3: return 0
+        mu = np.mean(self.data_buffer)
+        sigma = np.std(self.data_buffer)
+        return (value - mu) / (sigma + 1e-9)
+
+    async def execute_cycle(self, impedance_value, data_impact):
+        seal = self._generate_integrity_seal(impedance_value, data_impact)
         
-        # 1. Carrega as regras de Hardware do SOH v2.0 (JSON)
-        try:
-            with open('SOH_v2_Architecture.json', 'r') as f:
-                config = json.load(f)
-            self.thermal_limit = config.get('sigma_threshold', 1.36)
-        except:
-            self.thermal_limit = 1.36 # Fallback de segurança
+        if not self.check_hardware_physiology(impedance_value):
+            return {"status": "HALT", "seal": seal, "reason": "Hardware Impedance"}
 
-    def run_calibration(self, features, real_impact, current_impedance):
-        """
-        Integração Hardware-Software: Força o Metabolic Halt se houver impedância crítica.
-        """
-        # 2. Monitoramento de impedância (Sensor de Hardware)
-        if current_impedance > self.thermal_limit:
-            msg = f"[🚨 METABOLIC HALT] Impedância Crítica: {current_impedance}. Sistema Bloqueado."
-            print(msg)
-            self.send_emergency_alert(msg)
-            return None # O software para de processar aqui (Halt)
+        z = self.calculate_z_score(data_impact)
+        self.data_buffer.append(data_impact)
+        
+        return {"status": "STABLE", "seal": seal, "z_score": round(z, 4)}
 
-        # 3. Processamento normal
-        X = np.array(features).reshape(1, -1)
-        if not self.is_fitted:
-            self.scaler.fit(X)
-            self.model.partial_fit(self.scaler.transform(X), [0.5])
-            self.is_fitted = True
-            
-        X_scaled = self.scaler.transform(X)
-        self.model.partial_fit(X_scaled, [real_impact])
-        return self.model.predict(X_scaled)
-
-    def send_emergency_alert(self, message):
-        """Dispara o alerta para o seu WhatsApp via GitHub Secrets"""
-        sid = os.environ.get('TWILIO_ACCOUNT_SID')
-        token = os.environ.get('TWILIO_AUTH_TOKEN')
-        if sid and token:
-            client = Client(sid, token)
-            client.messages.create(
-                from_='whatsapp:+14155238886',
-                body=f"*ALERTA SOH v2.0*\n\n{message}",
-                to='whatsapp:+5521964316825'
-            )
-
-# --- EXECUÇÃO COM TRAVA DE SEGURANÇA ---
 if __name__ == "__main__":
+    # Código para execução local segura
     engine = SovereignEngine()
-    
-    # Simulação: Sensor detecta impedância de 1.50 (Limite é 1.36)
-    impedance_sensor = 1.50 
-    input_data = [0.95, 0.82, 0.90, 0.75]
-    
-    impact = engine.run_calibration(input_data, 0.92, impedance_sensor)
-    
-    if impact is None:
-        print("Protocolo de Emergência: Hardware-Anchored Physiology Blocked.")
-    else:
-        print(f"Impacto calculado com segurança: {impact}")
+    loop = asyncio.get_event_loop()
+    result = loop.run_until_complete(engine.execute_cycle(1.10, 0.88))
+    print(f"Status do Sistema: {result['status']}")
