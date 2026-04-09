@@ -1,0 +1,5 @@
+{
+  "id": "SOH-V2-STABLE-2026",
+  "protocol": "Homeostatic-Synchrony",
+  "sigma_threshold": 1.36
+}
