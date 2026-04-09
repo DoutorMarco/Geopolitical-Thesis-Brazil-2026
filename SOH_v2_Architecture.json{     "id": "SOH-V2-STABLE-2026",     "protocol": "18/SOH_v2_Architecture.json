@@ -1,0 +1,7 @@
+{
+    "id": "SOH-V2-STABLE-2026",
+    "protocol": "18/6 Neural Resilience",
+    "sigma_threshold": 1.36,
+    "thermal_limit_celsius": 82.5,
+    "impedance_unit": "Ohm"
+}
