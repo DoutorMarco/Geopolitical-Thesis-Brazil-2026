@@ -3,6 +3,5 @@ yfinance
 pandas
 numpy
 twilio
-scipy
-plotly
 biopython
+reportlab
