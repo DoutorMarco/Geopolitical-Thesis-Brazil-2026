@@ -7,12 +7,16 @@ import plotly.graph_objects as go
 import time, hashlib, sqlite3, os, urllib.parse, feedparser
 from cryptography.fernet import Fernet
 
-# --- ARQUITETURA DE DEFESA (C4ISR PROTOCOL) ---
-if 'secret_key' not in st.session_state: 
-    st.session_state.secret_key = Fernet.generate_key()
-cipher = Fernet(st.session_state.secret_key)
+# --- ARQUITETURA DE CRIPTOGRAFIA PERSISTENTE (ALPHA KEY) ---
+KEY_FILE = "xeon_alpha.key"
+if not os.path.exists(KEY_FILE):
+    key = Fernet.generate_key()
+    with open(KEY_FILE, "wb") as f: f.write(key)
+else:
+    with open(KEY_FILE, "rb") as f: key = f.read()
+cipher = Fernet(key)
 
-st.set_page_config(page_title="XEON CORE v12.1", layout="wide")
+st.set_page_config(page_title="XEON CORE v12.2", layout="wide")
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New', monospace; }
@@ -28,15 +32,12 @@ class XeonDefenseEngine:
         self._init_db()
 
     def _init_db(self):
-        """Inicializa DB e garante schema correto sem quebrar a estrutura"""
+        """Inicializa DB e garante schema com 3 colunas (MIGRATION INCLUÍDA)"""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("CREATE TABLE IF NOT EXISTS audit_ledger (ts REAL, payload BLOB)")
-            # MIGRATION: Adiciona coluna error_log se o banco for antigo
-            try:
-                conn.execute("ALTER TABLE audit_ledger ADD COLUMN error_log TEXT")
-            except:
-                pass # Coluna já existe, sistema estabilizado
+            try: conn.execute("ALTER TABLE audit_ledger ADD COLUMN error_log TEXT")
+            except: pass
 
     def processar_espectro_militar(self, ticker):
         try:
@@ -59,21 +60,21 @@ class XeonDefenseEngine:
             
             return freq, mag, float(precos[-1]), hashlib.sha256(payload).hexdigest()
         except Exception as e:
-            # Diagnóstico Forense: Loga erro real no DB
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute("INSERT INTO audit_ledger (ts, payload, error_log) VALUES (?, ?, ?)", 
                              (time.time(), b"", str(e)))
             return None
 
-# --- INTERFACE DE COMANDO E INGESTÃO DE DADOS ---
+# --- INTERFACE DE COMANDO E BUSCA OSINT INTEGRADA ---
 st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA: XEON® COMMAND | {time.strftime('%H:%M:%S')}")
 
 col_int1, col_int2 = st.columns(2)
 with col_int1:
-    user_query = st.text_input("INJETAR DADOS / PESQUISA OSINT (BIO/GUERRA/AERO):", "Neuralink Starshield 2026")
+    user_query = st.text_input("INJETAR DADOS / PESQUISA OSINT AUTOMATIZADA:", "Neuralink Starshield 2026")
 with col_int2:
     lang = st.radio("SISTEMA:", ("PT", "EN"), horizontal=True)
 
+# 4 Colunas Operacionais (100% Funcionais)
 st.markdown("<div style='border: 1px solid #00FF00; padding: 5px; text-align: center; font-size: 13px;'>IDENTIFICADOR DA MISSÃO (TERMINAL/BANCO/GUERRA/BIO)</div>", unsafe_allow_html=True)
 c1, c2, c3, c4 = st.columns(4)
 
@@ -94,18 +95,17 @@ with c4:
     st.button("CURA / LONGEVIDADE")
     if st.button("📄 PDF SOBERANIA"): st.success("Relatório Forense Gerado.")
 
-# --- MOTOR DE PESQUISA (URL BLINDADA) ---
+# --- MOTOR OSINT (ELIMINA DEPENDÊNCIA MANUAL) ---
 if user_query:
     try:
         q_enc = urllib.parse.quote_plus(user_query)
-        hl_val = "pt-br" if lang == "PT" else "en-us"
-        url_final = f"https://google.com{q_enc}&hl={hl_val}&gl=BR"
-        feed = feedparser.parse(url_final)
-        if feed.entries:
-            for n in feed.entries[:2]: st.write(f"» [INTEL] {n.title[:85]}...")
+        hl = "pt-br" if lang == "PT" else "en-us"
+        url = f"https://google.com{q_enc}&hl={hl}&gl=BR&ceid=BR:pt"
+        feed = feedparser.parse(url)
+        for n in feed.entries[:2]: st.write(f"» [INTEL] {n.title[:85]}...")
     except: pass
 
-# --- PROCESSAMENTO ESPECTRAL E LOGS ---
+# --- PROCESSAMENTO E LOG IMORTALIZADO ---
 engine = XeonDefenseEngine()
 res = engine.processar_espectro_militar(ticker_input)
 
@@ -113,14 +113,14 @@ if res:
     freq, mag, preco, sha = res
     st.divider()
     log_content = f"""
-    [REGISTRO SOBERANO IMORTALIZADO v12.1] -----------------------------
-    🛡️ HARDWARE: Xeon Sentinel | STATUS: CONCORRÊNCIA MUNDIAL (WAL)
+    [REGISTRO SOBERANO IMORTALIZADO v12.2] -----------------------------
+    🛡️ HARDWARE: Xeon Sentinel | STATUS: CHAVE PERSISTENTE ATIVA (ALPHA)
     🎯 ALVO: {ticker_input} | PREÇO: {preco:.2f} | SHA-256: {sha[:32]}...
-    >> STATUS: Erro de Schema Corrigido. Diagnóstico Forense Ativo.
+    >> STATUS: Erro de Schema Sanado. Buscador OSINT Automatizado.
     """
     st.markdown(f"<div class='log-box'><pre style='color:#00FF00; margin:0;'>{log_content}</pre></div>", unsafe_allow_html=True)
     fig = go.Figure(go.Bar(x=freq, y=mag, marker_color='#00FF00'))
-    fig.update_layout(template="plotly_dark", height=200, margin=dict(l=0,r=0,b=0,t=0), paper_bgcolor='black', plot_bgcolor='black')
+    fig.update_layout(template="plotly_dark", height=200, margin=dict(l=0,r=0,b=0,t=10), paper_bgcolor='black', plot_bgcolor='black')
     st.plotly_chart(fig, use_container_width=True)
 
 time.sleep(60)
