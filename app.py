@@ -1,4 +1,4 @@
-import streamlit as st
+ import streamlit as st
 import numpy as np
 import yfinance as yf
 from scipy.fft import fft, fftfreq
@@ -53,7 +53,7 @@ class XeonDefenseEngine:
 st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA: XEON® COMMAND | {time.strftime('%H:%M:%S')}")
 
 # Célula de Investigação OSINT (Correção do Erro de Porta)
-col_int1, col_int2 = st.columns([4, 1])
+col_int1, col_int2 = st.columns()
 with col_int1:
     user_query = st.text_input("INJETAR DADOS / PESQUISA OSINT (BIO/GUERRA/AERO):", "Neuralink Starshield 2026")
 with col_int2:
@@ -80,17 +80,15 @@ with c4:
     st.button("CURA / LONGEVIDADE")
     st.button("📄 PDF SOBERANIA")
 
-# --- MOTOR DE RESPOSTA E PESQUISA (CORREÇÃO CIRÚRGICA) ---
+# --- MOTOR DE RESPOSTA E PESQUISA (RESOLUÇÃO DE ERRO DE PORTA) ---
 if user_query:
     try:
         q_enc = urllib.parse.quote(user_query)
-        # Ajuste de Parâmetros para evitar que 'pt' seja lido como porta
-        hl_param = "pt-BR" if lang == "PT" else "en-US"
-        gl_param = "BR"
-        ceid_param = "BR:pt" if lang == "PT" else "US:en"
+        # Parâmetros separados para evitar erro 'nonnumeric port'
+        hl_val = "pt-BR" if lang == "PT" else "en-US"
+        ceid_val = "BR:pt" if lang == "PT" else "US:en"
         
-        # URL reconstruída seguindo o padrão RFC do Google News
-        url_final = f"https://google.com{q_enc}&hl={hl_param}&gl={gl_param}&ceid={ceid_param}"
+        url_final = f"https://google.com{q_enc}&hl={hl_val}&gl=BR&ceid={ceid_val}"
         
         feed = feedparser.parse(url_final).entries[:2]
         for n in feed: 
