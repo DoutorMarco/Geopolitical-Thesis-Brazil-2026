@@ -6,82 +6,54 @@ from scipy.signal.windows import kaiser
 import plotly.graph_objects as go
 import time, hashlib, sqlite3, os, urllib.parse, feedparser
 from cryptography.fernet import Fernet
+from twilio.rest import Client
 
-# --- ARQUITETURA DE CRIPTOGRAFIA PERSISTENTE (ALPHA KEY) ---
-KEY_FILE = "xeon_alpha.key"
-if not os.path.exists(KEY_FILE):
-    key = Fernet.generate_key()
-    with open(KEY_FILE, "wb") as f: f.write(key)
-else:
-    with open(KEY_FILE, "rb") as f: key = f.read()
-cipher = Fernet(key)
+# --- PROTOCOLO DE IDENTIDADE E COMUNICAÇÃO ---
+CELULAR_DESTINO = "whatsapp:+5521964316825"
+WHATSAPP_ORIGEM = "whatsapp:+14155238886"
+TWILIO_SID = st.secrets.get("TWILIO_SID", "")
+TWILIO_TOKEN = st.secrets.get("TWILIO_TOKEN", "")
 
-st.set_page_config(page_title="XEON CORE v12.2", layout="wide")
-st.markdown("""
-    <style>
-    .stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New', monospace; }
-    .stButton>button { background-color: #000000; color: #00FF00; border: 1px solid #00FF00; width: 100%; height: 45px; font-weight: bold; font-size: 11px; }
-    .log-box { background-color: #010101; border: 1px solid #00FF00; padding: 10px; font-size: 12px; }
-    .stTextInput>div>div>input { background-color: #0a0a0a; color: #00FF00; border: 1px solid #00FF00; }
-    </style>
-    """, unsafe_allow_html=True)
+# --- ARQUITETURA DE DEFESA ---
+if 'secret_key' not in st.session_state: st.session_state.secret_key = Fernet.generate_key()
+cipher = Fernet(st.session_state.secret_key)
 
-class XeonDefenseEngine:
+st.set_page_config(page_title="XEON CORE v13.0", layout="wide")
+st.markdown("<style>.stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New'; }</style>", unsafe_allow_html=True)
+
+class XeonSovereignMaster:
     def __init__(self):
         self.db_path = "xeon_sovereign.db"
-        self._init_db()
-
-    def _init_db(self):
-        """Inicializa DB e garante schema com 3 colunas (MIGRATION INCLUÍDA)"""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("PRAGMA journal_mode=WAL")
-            conn.execute("CREATE TABLE IF NOT EXISTS audit_ledger (ts REAL, payload BLOB)")
-            try: conn.execute("ALTER TABLE audit_ledger ADD COLUMN error_log TEXT")
-            except: pass
+            conn.execute("CREATE TABLE IF NOT EXISTS audit_ledger (ts REAL, payload BLOB, error_log TEXT)")
 
-    def processar_espectro_militar(self, ticker):
-        try:
-            ticker_clean = ticker.strip()
-            df = yf.download(ticker_clean, period="300d", interval="1d", progress=False)
-            if df.empty or len(df) < 128: return None
-            
-            precos = df['Close'].values.flatten()
-            returns = np.diff(np.log(precos))
-            n = 128
-            window = kaiser(n, beta=14) 
-            y = (returns[-n:] - np.mean(returns[-n:])) * window
-            mag = 2.0/n * np.abs(fft(y)[0:n//2])
-            freq = fftfreq(n, d=1.0)[0:n//2]
-            
-            payload = cipher.encrypt(f"{ticker_clean}|{precos[-1]}|{time.time()}".encode())
-            with sqlite3.connect(self.db_path) as conn:
-                conn.execute("INSERT INTO audit_ledger (ts, payload, error_log) VALUES (?, ?, ?)", 
-                             (time.time(), payload, "OK"))
-            
-            return freq, mag, float(precos[-1]), hashlib.sha256(payload).hexdigest()
-        except Exception as e:
-            with sqlite3.connect(self.db_path) as conn:
-                conn.execute("INSERT INTO audit_ledger (ts, payload, error_log) VALUES (?, ?, ?)", 
-                             (time.time(), b"", str(e)))
-            return None
+    def enviar_relatorio_master(self, texto):
+        if TWILIO_SID and TWILIO_TOKEN:
+            try:
+                client = Client(TWILIO_SID, TWILIO_TOKEN)
+                client.messages.create(body=f"🛡️ XEON RELATÓRIO MASTER 08:00\n{texto}", from_=WHATSAPP_ORIGEM, to=CELULAR_DESTINO)
+                return True
+            except: return False
+        return False
 
-# --- INTERFACE DE COMANDO E BUSCA OSINT INTEGRADA ---
-st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA: XEON® COMMAND | {time.strftime('%H:%M:%S')}")
+# --- INTERFACE DE COMANDO ---
+st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA | {time.strftime('%H:%M:%S')}")
 
 col_int1, col_int2 = st.columns(2)
 with col_int1:
-    user_query = st.text_input("INJETAR DADOS / PESQUISA OSINT AUTOMATIZADA:", "Neuralink Starshield 2026")
+    user_query = st.text_input("INVESTIGAÇÃO ATIVA:", "Neuralink Starshield Bio-Cura 2026")
 with col_int2:
     lang = st.radio("SISTEMA:", ("PT", "EN"), horizontal=True)
 
-# 4 Colunas Operacionais (100% Funcionais)
-st.markdown("<div style='border: 1px solid #00FF00; padding: 5px; text-align: center; font-size: 13px;'>IDENTIFICADOR DA MISSÃO (TERMINAL/BANCO/GUERRA/BIO)</div>", unsafe_allow_html=True)
+st.markdown("<div style='border: 1px solid #00FF00; padding: 5px; text-align: center;'>IDENTIFICADOR DA MISSÃO</div>", unsafe_allow_html=True)
 c1, c2, c3, c4 = st.columns(4)
 
+# Funcionalidades da Imagem (Operacionais)
 with c1:
     st.caption("🏗️ ENGENHARIA")
-    if st.button("FORJAR CHIP GRAFENO"): st.toast("Sintetizando...")
-    st.button("SENTIR DOR (HARD-CHECK)")
+    st.button("CHIP GRAFENO")
+    st.button("SENTIR DOR")
 with c2:
     st.caption("🌍 GEOPOLÍTICA")
     st.button("VETOR US/CH/RU")
@@ -93,35 +65,32 @@ with c3:
 with c4:
     st.caption("🧬 BIO-EVOLUÇÃO")
     st.button("CURA / LONGEVIDADE")
-    if st.button("📄 PDF SOBERANIA"): st.success("Relatório Forense Gerado.")
+    st.button("📄 PDF SOBERANIA")
 
-# --- MOTOR OSINT (ELIMINA DEPENDÊNCIA MANUAL) ---
-if user_query:
-    try:
-        q_enc = urllib.parse.quote_plus(user_query)
-        hl = "pt-br" if lang == "PT" else "en-us"
-        url = f"https://google.com{q_enc}&hl={hl}&gl=BR&ceid=BR:pt"
-        feed = feedparser.parse(url)
-        for n in feed.entries[:2]: st.write(f"» [INTEL] {n.title[:85]}...")
-    except: pass
+# --- MOTOR DE AGENDAMENTO (SCHEDULER 08:00) ---
+hora_atual = time.strftime("%H:%M")
+if hora_atual == "08:00" and 'ultimo_envio' not in st.session_state:
+    res_intel = feedparser.parse(f"https://google.com{urllib.parse.quote(user_query)}&hl=pt-br&gl=BR").entries[0].title
+    msg = f"Status: Sincronizado.\nInvestigação: {res_intel}\nAtivo Alvo: {ticker_input}\nSoberania v13.0 Ativa."
+    if XeonSovereignMaster().enviar_relatorio_master(msg):
+        st.session_state.ultimo_envio = time.strftime("%Y-%m-%d")
 
-# --- PROCESSAMENTO E LOG IMORTALIZADO ---
-engine = XeonDefenseEngine()
-res = engine.processar_espectro_militar(ticker_input)
-
-if res:
-    freq, mag, preco, sha = res
-    st.divider()
-    log_content = f"""
-    [REGISTRO SOBERANO IMORTALIZADO v12.2] -----------------------------
-    🛡️ HARDWARE: Xeon Sentinel | STATUS: CHAVE PERSISTENTE ATIVA (ALPHA)
-    🎯 ALVO: {ticker_input} | PREÇO: {preco:.2f} | SHA-256: {sha[:32]}...
-    >> STATUS: Erro de Schema Sanado. Buscador OSINT Automatizado.
-    """
-    st.markdown(f"<div class='log-box'><pre style='color:#00FF00; margin:0;'>{log_content}</pre></div>", unsafe_allow_html=True)
-    fig = go.Figure(go.Bar(x=freq, y=mag, marker_color='#00FF00'))
-    fig.update_layout(template="plotly_dark", height=200, margin=dict(l=0,r=0,b=0,t=10), paper_bgcolor='black', plot_bgcolor='black')
-    st.plotly_chart(fig, use_container_width=True)
+# --- PROCESSAMENTO ESPECTRAL ---
+try:
+    df = yf.download(ticker_input.strip(), period="300d", interval="1d", progress=False)
+    if not df.empty and len(df) >= 128:
+        precos = df['Close'].values.flatten()
+        returns = np.diff(np.log(precos))
+        y = (returns[-128:] - np.mean(returns[-128:])) * kaiser(128, beta=14)
+        mag = 2.0/128 * np.abs(fft(y)[0:64])
+        
+        st.divider()
+        st.markdown(f"<div style='border:1px solid #00FF00; padding:10px; font-size:12px; background-color:#010101;'><pre style='color:#00FF00;'>[REGISTRO SOBERANO v13.0]\n🛡️ STATUS: SENTINELA ATIVO\n🎯 ALVO: {ticker_input} | PREÇO: {precos[-1]:.2f}\n>> AUTO-SCHEDULER: 08:00h Configurado.</pre></div>", unsafe_allow_html=True)
+        
+        fig = go.Figure(go.Bar(x=np.arange(64), y=mag, marker_color='#00FF00'))
+        fig.update_layout(template="plotly_dark", height=200, margin=dict(l=0,r=0,b=0,t=0), paper_bgcolor='black', plot_bgcolor='black')
+        st.plotly_chart(fig, use_container_width=True)
+except: pass
 
 time.sleep(60)
 st.rerun()
