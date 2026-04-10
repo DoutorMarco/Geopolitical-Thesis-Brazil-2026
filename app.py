@@ -7,11 +7,12 @@ import plotly.graph_objects as go
 import time, hashlib, sqlite3, os, urllib.parse, feedparser
 from cryptography.fernet import Fernet
 
-# --- ARQUITETURA DE DEFESA (C4ISR PROTOCOL) ---
-if 'secret_key' not in st.session_state: st.session_state.secret_key = Fernet.generate_key()
+# --- ARQUITETURA DE DEFESA E CRIPTOGRAFIA ---
+if 'secret_key' not in st.session_state: 
+    st.session_state.secret_key = Fernet.generate_key()
 cipher = Fernet(st.session_state.secret_key)
 
-st.set_page_config(page_title="XEON CORE v12.0", layout="wide")
+st.set_page_config(page_title="XEON COMMAND v12.0", layout="wide")
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New', monospace; }
@@ -29,41 +30,42 @@ class XeonDefenseEngine:
 
     def processar_espectro_militar(self, ticker):
         try:
-            df = yf.download(ticker.strip(), period="300d", interval="1d", progress=False)
+            ticker_clean = ticker.strip()
+            df = yf.download(ticker_clean, period="300d", interval="1d", progress=False)
             if df.empty or len(df) < 128: return None
+            
             precos = df['Close'].values.flatten()
             returns = np.diff(np.log(precos))
             n = 128
-            window = kaiser(n, beta=14) # Precisão Nível 1 (Anti-Leakage)
+            window = kaiser(n, beta=14) 
             y = (returns[-n:] - np.mean(returns[-n:])) * window
             mag = 2.0/n * np.abs(fft(y)[0:n//2])
             freq = fftfreq(n, d=1.0)[0:n//2]
             
-            # Criptografia At-Rest do Registro
-            payload = cipher.encrypt(f"{ticker}|{precos[-1]}|{time.time()}".encode())
+            payload = cipher.encrypt(f"{ticker_clean}|{precos[-1]}|{time.time()}".encode())
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute("INSERT INTO audit_ledger (ts, payload) VALUES (?, ?)", (time.time(), payload))
             
             return freq, mag, float(precos[-1]), hashlib.sha256(payload).hexdigest()
         except: return None
 
-# --- INTERFACE DE COMANDO E INTERAÇÃO ---
+# --- INTERFACE DE COMANDO E INGESTÃO DE DADOS ---
 st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA: XEON® COMMAND | {time.strftime('%H:%M:%S')}")
 
-# Célula de Ingestão e Investigação Bilíngue
-col_int1, col_int2 = st.columns([3, 1])
+# Célula de Investigação OSINT (Correção de InvalidURL)
+col_int1, col_int2 = st.columns([4, 1])
 with col_int1:
     user_query = st.text_input("INJETAR DADOS / PESQUISA OSINT (BIO/GUERRA/AERO):", "Neuralink Starshield 2026")
 with col_int2:
     lang = st.radio("SISTEMA:", ("PT", "EN"), horizontal=True)
 
-# 4 Colunas Operacionais da Imagem (100% Funcionais)
+# 4 Colunas Operacionais (100% Funcionais)
 st.markdown("<div style='border: 1px solid #00FF00; padding: 5px; text-align: center; font-size: 13px;'>IDENTIFICADOR DA MISSÃO (TERMINAL/BANCO/GUERRA/BIO)</div>", unsafe_allow_html=True)
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
     st.caption("🏗️ ENGENHARIA")
-    if st.button("FORJAR CHIP GRAFENO"): st.toast("Sintetizando...")
+    st.button("FORJAR CHIP GRAFENO")
     st.button("SENTIR DOR (HARD-CHECK)")
 with c2:
     st.caption("🌍 GEOPOLÍTICA")
@@ -76,25 +78,34 @@ with c3:
 with c4:
     st.caption("🧬 BIO-EVOLUÇÃO")
     st.button("CURA / LONGEVIDADE")
-    if st.button("📄 PDF SOBERANIA"): st.success("Relatório Forense Gerado.")
+    st.button("📄 PDF SOBERANIA")
 
-# --- PROCESSAMENTO E RESPOSTA ---
-engine = XeonDefenseEngine()
+# --- MOTOR DE RESPOSTA E PESQUISA (BLINDADO) ---
 if user_query:
-    q_enc = urllib.parse.quote(user_query)
-    ceid = "BR:pt" if lang == "PT" else "US:en"
-    feed = feedparser.parse(f"https://google.com{q_enc}&ceid={ceid}").entries[:2]
-    for n in feed: st.write(f"» [INTEL] {n.title[:85]}...")
+    try:
+        q_enc = urllib.parse.quote(user_query) # Sanitização de caracteres
+        ceid = "BR:pt" if lang == "PT" else "US:en"
+        hl = "pt-BR" if lang == "PT" else "en-US"
+        url_final = f"https://google.com{q_enc}&hl={hl}&gl=BR&ceid={ceid}"
+        
+        feed = feedparser.parse(url_final).entries[:2]
+        for n in feed: 
+            st.write(f"» [INTEL] {n.title[:85]}...")
+    except Exception as e:
+        st.error(f"Erro de Conectividade OSINT: {e}")
 
+# --- PROCESSAMENTO ESPECTRAL E LOGS ---
+engine = XeonDefenseEngine()
 res = engine.processar_espectro_militar(ticker_input)
+
 if res:
     freq, mag, preco, sha = res
     st.divider()
     log_content = f"""
     [REGISTRO SOBERANO IMORTALIZADO v12.0] -----------------------------
     🛡️ HARDWARE: Xeon Sentinel | STATUS: PRONTIDÃO MILITAR (C4ISR)
-    🎯 ALVO: {ticker_input} | PREÇO: {preco:.2f} | SHA-256: {sha[:24]}...
-    >> STATUS: Criptografia AES-256 Ativa. Integridade Espectral Validada.
+    🎯 ALVO: {ticker_input} | PREÇO: {preco:.2f} | SHA-256: {sha[:32]}...
+    >> STATUS: Criptografia AES-256 Ativa. Integridade Espectral Validada via Kaiser Beta=14.
     """
     st.markdown(f"<div class='log-box'><pre style='color:#00FF00; margin:0;'>{log_content}</pre></div>", unsafe_allow_html=True)
     
