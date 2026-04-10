@@ -5,3 +5,4 @@ numpy
 twilio
 biopython
 reportlab
+feedparser
