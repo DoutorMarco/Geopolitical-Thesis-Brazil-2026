@@ -1,4 +1,4 @@
-streamlit
+ streamlit
 yfinance
 pandas
 numpy
@@ -6,3 +6,5 @@ twilio
 biopython
 reportlab
 feedparser
+plotly
+scipy
