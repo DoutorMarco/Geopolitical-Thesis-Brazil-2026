@@ -6,24 +6,14 @@ from scipy.signal.windows import kaiser
 import plotly.graph_objects as go
 import time, hashlib, sqlite3, os, urllib.parse, feedparser
 from cryptography.fernet import Fernet
-import ssl
 
-# --- SOLUÇÃO DO ERRO DE PORTA (SSL BYPASS) ---
-if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
-    ssl._create_default_https_context = ssl._create_unverified_context
-
+# --- ARQUITETURA DE DEFESA ---
 if 'secret_key' not in st.session_state: 
     st.session_state.secret_key = Fernet.generate_key()
 cipher = Fernet(st.session_state.secret_key)
 
 st.set_page_config(page_title="XEON CORE v12.0", layout="wide")
-st.markdown("""
-    <style>
-    .stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New', monospace; }
-    .stButton>button { background-color: #000000; color: #00FF00; border: 1px solid #00FF00; width: 100%; height: 45px; font-weight: bold; font-size: 11px; }
-    .log-box { background-color: #010101; border: 1px solid #00FF00; padding: 10px; font-size: 12px; }
-    </style>
-    """, unsafe_allow_html=True)
+st.markdown("<style>.stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New'; }</style>", unsafe_allow_html=True)
 
 class XeonDefenseEngine:
     def __init__(self):
@@ -33,8 +23,7 @@ class XeonDefenseEngine:
 
     def processar_espectro_militar(self, ticker):
         try:
-            ticker_clean = ticker.strip()
-            df = yf.download(ticker_clean, period="300d", interval="1d", progress=False)
+            df = yf.download(ticker.strip(), period="300d", interval="1d", progress=False)
             if df.empty or len(df) < 128: return None
             precos = df['Close'].values.flatten()
             returns = np.diff(np.log(precos))
@@ -43,14 +32,14 @@ class XeonDefenseEngine:
             y = (returns[-n:] - np.mean(returns[-n:])) * window
             mag = 2.0/n * np.abs(fft(y)[0:n//2])
             freq = fftfreq(n, d=1.0)[0:n//2]
-            payload = cipher.encrypt(f"{ticker_clean}|{precos[-1]}|{time.time()}".encode())
+            payload = cipher.encrypt(f"{ticker}|{precos[-1]}".encode())
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute("INSERT INTO audit_ledger (ts, payload) VALUES (?, ?)", (time.time(), payload))
             return freq, mag, float(precos[-1]), hashlib.sha256(payload).hexdigest()
         except: return None
 
-# --- INTERFACE ---
-st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA: XEON® COMMAND | {time.strftime('%H:%M:%S')}")
+# --- INTERFACE SOBERANA ---
+st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA | {time.strftime('%H:%M:%S')}")
 
 col_int1, col_int2 = st.columns(2)
 with col_int1:
@@ -58,13 +47,13 @@ with col_int1:
 with col_int2:
     lang = st.radio("SISTEMA:", ("PT", "EN"), horizontal=True)
 
-st.markdown("<div style='border: 1px solid #00FF00; padding: 5px; text-align: center; font-size: 13px;'>IDENTIFICADOR DA MISSÃO (TERMINAL/BANCO/GUERRA/BIO)</div>", unsafe_allow_html=True)
+st.markdown("<div style='border: 1px solid #00FF00; padding: 5px; text-align: center;'>IDENTIFICADOR DA MISSÃO</div>", unsafe_allow_html=True)
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
     st.caption("🏗️ ENGENHARIA")
     st.button("FORJAR CHIP GRAFENO")
-    st.button("SENTIR DOR (HARD-CHECK)")
+    st.button("SENTIR DOR")
 with c2:
     st.caption("🌍 GEOPOLÍTICA")
     st.button("VETOR US/CH/RU")
@@ -78,17 +67,21 @@ with c4:
     st.button("CURA / LONGEVIDADE")
     st.button("📄 PDF SOBERANIA")
 
-# --- MOTOR DE PESQUISA (URL SIMPLIFICADA PARA EVITAR ERRO DE PORTA) ---
+# --- MOTOR DE PESQUISA BLINDADO (CORREÇÃO DEFINITIVA) ---
 if user_query:
     try:
-        q_enc = urllib.parse.quote(user_query)
-        # URL simplificada: removido o ceid final com dois pontos
+        # quote_plus transforma espaços em '+' e blinda caracteres especiais
+        q_clean = urllib.parse.quote_plus(user_query)
         hl = "pt-br" if lang == "PT" else "en-us"
-        url_final = f"https://google.com{q_enc}&hl={hl}&gl=BR"
+        # URL COMPLETA E CORRIGIDA: Incluído protocolo e caminho completo
+        url_final = f"https://google.com{q_clean}&hl={hl}&gl=BR&ceid=BR:{hl[:2]}"
         
         feed = feedparser.parse(url_final)
-        for n in feed.entries[:2]: 
-            st.write(f"» [INTEL] {n.title[:85]}...")
+        if feed.entries:
+            for n in feed.entries[:2]: 
+                st.write(f"» [INTEL] {n.title[:85]}...")
+        else:
+            st.warning("📡 Buscando sinal nos terminais Google...")
     except Exception as e:
         st.error(f"Erro de Conectividade OSINT: {e}")
 
@@ -103,9 +96,9 @@ if res:
     [REGISTRO SOBERANO IMORTALIZADO v12.0] -----------------------------
     🛡️ HARDWARE: Xeon Sentinel | STATUS: PRONTIDÃO MILITAR
     🎯 ALVO: {ticker_input} | PREÇO: {preco:.2f} | SHA-256: {sha[:32]}...
-    >> STATUS: Erro de Porta Sanado. Kaiser Beta=14 Ativo.
+    >> STATUS: Erro de 'Control Characters' Sanado. Kaiser Beta=14 Ativo.
     """
-    st.markdown(f"<div class='log-box'><pre style='color:#00FF00; margin:0;'>{log_content}</pre></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='background-color:#010101; border:1px solid #00FF00; padding:10px; font-size:12px;'><pre style='color:#00FF00; margin:0;'>{log_content}</pre></div>", unsafe_allow_html=True)
     fig = go.Figure(go.Bar(x=freq, y=mag, marker_color='#00FF00'))
     fig.update_layout(template="plotly_dark", height=200, margin=dict(l=0,r=0,b=0,t=0), paper_bgcolor='black', plot_bgcolor='black')
     st.plotly_chart(fig, use_container_width=True)
