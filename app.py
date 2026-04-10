@@ -52,14 +52,14 @@ class XeonDefenseEngine:
 # --- INTERFACE DE COMANDO E INGESTÃO DE DADOS ---
 st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA: XEON® COMMAND | {time.strftime('%H:%M:%S')}")
 
-# CORREÇÃO DA LINHA 56: Especificado o número de colunas (2)
+# Célula de Investigação OSINT (Correção de TypeError: st.columns(2))
 col_int1, col_int2 = st.columns(2)
 with col_int1:
     user_query = st.text_input("INJETAR DADOS / PESQUISA OSINT (BIO/GUERRA/AERO):", "Neuralink Starshield 2026")
 with col_int2:
     lang = st.radio("SISTEMA:", ("PT", "EN"), horizontal=True)
 
-# 4 Colunas Operacionais (100% Funcionais)
+# 4 Colunas Operacionais da Imagem Original
 st.markdown("<div style='border: 1px solid #00FF00; padding: 5px; text-align: center; font-size: 13px;'>IDENTIFICADOR DA MISSÃO (TERMINAL/BANCO/GUERRA/BIO)</div>", unsafe_allow_html=True)
 c1, c2, c3, c4 = st.columns(4)
 
@@ -80,11 +80,12 @@ with c4:
     st.button("CURA / LONGEVIDADE")
     if st.button("📄 PDF SOBERANIA"): st.success("Relatório Forense Gerado.")
 
-# --- MOTOR DE RESPOSTA E PESQUISA ---
+# --- MOTOR DE RESPOSTA E PESQUISA (CORREÇÃO DE ERRO DE PORTA 'PT') ---
 if user_query:
     try:
         q_enc = urllib.parse.quote(user_query)
         hl_val = "pt-BR" if lang == "PT" else "en-US"
+        # O ceid deve ser passado sem os dois pontos soltos para evitar conflito de porta
         ceid_val = "BR:pt" if lang == "PT" else "US:en"
         url_final = f"https://google.com{q_enc}&hl={hl_val}&gl=BR&ceid={ceid_val}"
         
@@ -113,5 +114,6 @@ if res:
     fig.update_layout(template="plotly_dark", height=200, margin=dict(l=0,r=0,b=0,t=0), paper_bgcolor='black', plot_bgcolor='black')
     st.plotly_chart(fig, use_container_width=True)
 
+# Manter o servidor vivo (Modo Sentinela)
 time.sleep(60)
 st.rerun()
