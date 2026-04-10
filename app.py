@@ -1,52 +1,46 @@
 import streamlit as st
-import yfinance as yf
 import pandas as pd
-import numpy as np
-from twilio.rest import Client
-from Bio import Entrez
+import plotly.express as px
 import feedparser
-import time
 
-# --- CONFIGURAÇÕES DE COMANDO ---
-CELULAR_DESTINO = "whatsapp:+5521964316825"
-Entrez.email = "xeon.terminal@command.gov"
+# --- CONFIGURAÇÃO DE INTERFACE (THEME: ONYX & NEON) ---
+st.set_page_config(page_title="XEON COMMAND", layout="wide")
 
-def buscar_inteligencia(termo):
-    url = f"https://google.com{termo.replace(' ', '+')}&hl=pt-BR&gl=BR"
-    feed = feedparser.parse(url)
-    return [n.title for n in feed.entries[:3]]
+# CSS para forçar o visual Preto com Verde Neon
+st.markdown("""
+    <style>
+    .stApp { background-color: #000000; color: #00FF00; }
+    h1, h2, h3, p { color: #00FF00 !important; font-family: 'Courier New', Courier, monospace; }
+    .stButton>button { background-color: #000000; color: #00FF00; border: 1px solid #00FF00; }
+    .stTextInput>div>div>input { background-color: #111111; color: #00FF00; border: 1px solid #00FF00; }
+    </style>
+    """, unsafe_allow_html=True)
 
-# --- INTERFACE DE INVESTIGAÇÃO INTERATIVA ---
 st.title("🛡️ XEON® COMMAND - NÚCLEO SOBERANO")
-st.subheader("PRECISÃO LÓGICA EM TEMPO REAL: 99.99978%")
+st.write("STATUS: OPERAÇÃO EM REGIME DE DEFESA NACIONAL")
 
-# Módulo de Investigação (Trabalho Ativo)
-query_investigacao = st.text_input("🔬 CAMPO DE INVESTIGAÇÃO (BIO/GUERRA/AERO):", "Neuralink Starshield Bio-Cura")
-if st.button("INICIAR INVESTIGAÇÃO"):
-    with st.spinner("Varrendo Terminais Mundiais..."):
-        resultados = buscar_inteligencia(query_investigacao)
-        for r in resultados:
-            st.write(f"» {r}")
+# --- MÓDULO: MAPA DE CALOR GEOPOLÍTICO REAL ---
+st.header("🌍 MAPA DE CALOR: FOCOS DE TENSÃO GLOBAL")
 
-# --- AGENDAMENTO AUTOMÁTICO (Lógica de 08:00) ---
-st.sidebar.header("AGENDAMENTO DE SOBERANIA")
-hora_alerta = st.sidebar.time_input("Horário do Relatório Diário", value=None)
+# Dados de exemplo de focos de conflito/tensão (Pode ser automatizado via API)
+focos_tensao = {
+    'Local': ['Oriente Médio', 'Leste Europeu', 'Mar do Sul da China', 'Fronteira Brasil/Venezuela'],
+    'Lat': [32.0, 48.0, 15.0, 4.0],
+    'Lon': [35.0, 31.0, 115.0, -60.0],
+    'Intensidade': [95, 98, 80, 40]
+}
+df_mapa = pd.DataFrame(focos_tensao)
 
-# Lógica de Background (Simulada para Dashboard Ativo)
-agora = time.strftime("%H:%M")
-if agora == "08:00":
-    # Aciona o gatilho automático de envio (Twilio) apenas uma vez
-    st.toast("Disparando Relatório Matinal de Soberania...")
-    # [Inserir aqui a função enviar_whatsapp com o resumo de todos os módulos]
+fig_mapa = px.density_mapbox(df_mapa, lat='Lat', lon='Lon', z='Intensidade', radius=30,
+                             center=dict(lat=20, lon=0), zoom=1,
+                             mapbox_style="carto-darkmatter", title="ZONAS DE CONFLITO ATIVAS")
+fig_mapa.update_layout(margin={"r":0,"t":40,"l":0,"b":0}, paper_bgcolor='black', font_color='#00FF00')
+st.plotly_chart(fig_mapa, use_container_width=True)
 
-# --- DASHBOARD DE SIMULAÇÃO REAL ---
-col1, col2 = st.columns(2)
-with col1:
-    st.info("🛰️ AEROESPACIAL & DEFESA")
-    noticias_space = buscar_inteligencia("SpaceX Starshield Neuralink")
-    for n in noticias_space: st.caption(n)
-
-with col2:
-    st.warning("🌍 GEOPOLÍTICA DE GUERRA")
-    noticias_guerra = buscar_inteligencia("EUA China Russia Departamento Guerra")
-    for n in noticias_guerra: st.caption(n)
+# --- INVESTIGAÇÃO INTERATIVA ---
+query_investigacao = st.text_input("🔬 INVESTIGAÇÃO PROFUNDA (BIO/GUERRA/AERO):", "Neuralink Starshield 2026")
+if st.button("EXECUTAR PROTOCOLO DE BUSCA"):
+    url = f"https://google.com{query_investigacao.replace(' ', '+')}&hl=pt-BR&gl=BR"
+    feed = feedparser.parse(url)
+    for n in feed.entries[:5]:
+        st.write(f"» [LINK] {n.title}")
