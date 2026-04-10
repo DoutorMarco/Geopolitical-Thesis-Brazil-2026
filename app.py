@@ -2,32 +2,36 @@ import streamlit as st
 import numpy as np
 import yfinance as yf
 from scipy.fft import fft, fftfreq
-from scipy.signal import kaiser
+from scipy.signal.windows import kaiser
 import plotly.graph_objects as go
 import time
 
 # --- ARQUITETURA SUPREMA (NEON TERMINAL) ---
 st.set_page_config(page_title="XEON CORE v4.0", layout="wide")
-st.markdown("<style>.stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New'; }</style>", unsafe_allow_html=True)
+st.markdown("""
+    <style>
+    .stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New', monospace; }
+    .stButton>button { background-color: #000000; color: #00FF00; border: 1px solid #00FF00; width: 100%; font-weight: bold; }
+    .stMetric { background-color: #0a0a0a; border: 1px solid #00FF00; padding: 10px; border-radius: 5px; }
+    </style>
+    """, unsafe_allow_html=True)
 
 class XeonSupremoEngine:
     """Motor de Precisão Nível 1: Janela Kaiser Adaptativa + Overlap 50%"""
 
     def processar_sinal_atomico(self, ticker):
         try:
-            # Captura de 256 pontos para permitir Overlap de 50% (128+128)
+            # Captura de 256 pontos para permitir Overlap de 50%
             df = yf.download(ticker.strip(), period="300d", interval="1d", progress=False)
             if len(df) < 256: return None, None, "DADOS INSUFICIENTES", None
             
             precos = df['Close'].values.flatten()[-256:]
             
             # 1. DIVISÃO EM OVERLAP (SOMA DE SOBREPOSIÇÃO)
-            # Processamos dois blocos de 128 com 50% de sobreposição para 0% perda de energia
             bloco_1 = precos[0:128]
             bloco_2 = precos[64:192] 
             
             # 2. JANELA DE KAISER ADAPTATIVA (BETA = 14)
-            # Beta 14 fornece supressão de banda lateral de nível armamentista (>100dB)
             n = 128
             window = kaiser(n, beta=14)
             
