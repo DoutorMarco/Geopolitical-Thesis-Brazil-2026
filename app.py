@@ -52,8 +52,8 @@ class XeonDefenseEngine:
 # --- INTERFACE DE COMANDO E INGESTÃO DE DADOS ---
 st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA: XEON® COMMAND | {time.strftime('%H:%M:%S')}")
 
-# Célula de Investigação OSINT
-col_int1, col_int2 = st.columns()
+# CORREÇÃO DA LINHA 56: Especificado o número de colunas (2)
+col_int1, col_int2 = st.columns(2)
 with col_int1:
     user_query = st.text_input("INJETAR DADOS / PESQUISA OSINT (BIO/GUERRA/AERO):", "Neuralink Starshield 2026")
 with col_int2:
@@ -80,7 +80,7 @@ with c4:
     st.button("CURA / LONGEVIDADE")
     if st.button("📄 PDF SOBERANIA"): st.success("Relatório Forense Gerado.")
 
-# --- MOTOR DE RESPOSTA E PESQUISA (URL BLINDADA) ---
+# --- MOTOR DE RESPOSTA E PESQUISA ---
 if user_query:
     try:
         q_enc = urllib.parse.quote(user_query)
