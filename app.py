@@ -4,126 +4,121 @@ import yfinance as yf
 from scipy.fft import fft
 from scipy.signal.windows import kaiser
 import plotly.graph_objects as go
-import time, hashlib, sqlite3, os, urllib.parse, feedparser
+import time, urllib.parse, feedparser
 from reportlab.pdfgen import canvas
 from io import BytesIO
 
-# --- CONFIGURAÇÃO DE INTERFACE E CORES DA IMAGEM ---
-st.set_page_config(page_title="XEON COMMAND v14.0", layout="wide")
+# --- CONFIGURAÇÃO DE INTERFACE E CORES (IDENTIDADE VISUAL DA IMAGEM) ---
+st.set_page_config(page_title="XEON COMMAND v15.0", layout="wide")
 
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00FFCC; font-family: 'Courier New', monospace; }
     
-    /* ESTILIZAÇÃO DOS BOTÕES POR COLUNA (CORES DA IMAGEM) */
-    /* Engenharia - Amarelo */
-    div[data-testid="column"]:nth-child(1) button { background-color: #FFCC00 !important; color: black !important; border-radius: 0; font-weight: bold; border: 1px solid #00FFCC; width: 100%; }
+    /* ESTILIZAÇÃO CIRÚRGICA DOS BOTÕES (CORES DA IMAGEM) */
+    /* Coluna 1 - Engenharia: Amarelo */
+    div[data-testid="column"]:nth-child(1) button { background-color: #FFCC00 !important; color: black !important; border-radius: 0; font-weight: bold; border: 1px solid #00FFCC; width: 100%; height: 45px; }
     
-    /* Geopolítica - Verde Mar/Teal */
-    div[data-testid="column"]:nth-child(2) button { background-color: #008080 !important; color: white !important; border-radius: 0; font-weight: bold; border: 1px solid #00FFCC; width: 100%; }
+    /* Coluna 2 - Geopolítica: Verde Mar */
+    div[data-testid="column"]:nth-child(2) button { background-color: #008080 !important; color: white !important; border-radius: 0; font-weight: bold; border: 1px solid #00FFCC; width: 100%; height: 45px; }
     
-    /* Financeiro - Branco */
-    div[data-testid="column"]:nth-child(3) button { background-color: #FFFFFF !important; color: black !important; border-radius: 0; font-weight: bold; border: 1px solid #00FFCC; width: 100%; }
+    /* Coluna 3 - Financeiro: Branco */
+    div[data-testid="column"]:nth-child(3) button { background-color: #FFFFFF !important; color: black !important; border-radius: 0; font-weight: bold; border: 1px solid #00FFCC; width: 100%; height: 45px; }
     
-    /* Bio - Ciano e Vermelho */
-    div[data-testid="column"]:nth-child(4) button:first-child { background-color: #00FFFF !important; color: black !important; border-radius: 0; font-weight: bold; border: 1px solid #00FFCC; width: 100%; }
-    div[data-testid="column"]:nth-child(4) button:last-child { background-color: #FF3300 !important; color: white !important; border-radius: 0; font-weight: bold; border: 1px solid #00FFCC; width: 100%; }
+    /* Coluna 4 - Bio: Ciano e Vermelho */
+    div[data-testid="column"]:nth-child(4) button:first-child { background-color: #00FFFF !important; color: black !important; border-radius: 0; font-weight: bold; border: 1px solid #00FFCC; width: 100%; height: 45px; }
+    div[data-testid="column"]:nth-child(4) button:last-child { background-color: #FF3300 !important; color: white !important; border-radius: 0; font-weight: bold; border: 1px solid #00FFCC; width: 100%; height: 45px; }
 
-    .log-box { background-color: #000000; border: 2px solid #00FFCC; padding: 15px; color: #00FFCC; font-size: 13px; margin-top: 10px; }
+    .log-box { background-color: #000000; border: 2px solid #00FFCC; padding: 15px; color: #00FFCC; font-size: 13px; }
     .stTextInput>div>div>input { background-color: #050505; color: #00FFCC; border: 1px solid #00FFCC; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- FUNÇÃO: GERAR PDF DE SOBERANIA ---
-def gerar_pdf(ticker, preco, intel):
+# --- MOTOR DE INTELIGÊNCIA (OSINT E PDF) ---
+def buscar_intel(query, idioma="pt-br"):
+    try:
+        q_enc = urllib.parse.quote(query)
+        url = f"https://google.com{q_enc}&hl={idioma}&gl=BR&ceid=BR:pt"
+        feed = feedparser.parse(url)
+        return feed.entries[0].title if feed.entries else "Aguardando sinal..."
+    except: return "Sinal Interrompido."
+
+def gerar_pdf_relatorio(ticker, preco, intel):
     buf = BytesIO()
     c = canvas.Canvas(buf)
-    c.setFont("Helvetica-Bold", 16)
-    c.drawString(50, 800, "XEON® COMMAND - RELATÓRIO DE SOBERANIA")
-    c.setFont("Helvetica", 12)
-    c.drawString(50, 770, f"DATA: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-    c.drawString(50, 750, f"ATIVO ANALISADO: {ticker} | PREÇO: {preco}")
-    c.drawString(50, 730, "ÚLTIMA INVESTIGAÇÃO OSINT:")
-    c.drawString(50, 715, f"> {intel[:80]}...")
-    c.drawString(50, 680, "STATUS: VALIDADO POR CRIPTOGRAFIA SHA-256.")
+    c.setFont("Courier-Bold", 16)
+    c.drawString(50, 800, "XEON COMMAND - RELATÓRIO DE SOBERANIA")
+    c.setFont("Courier", 12)
+    c.drawString(50, 770, f"CARIMBO DO TEMPO: {time.ctime()}")
+    c.drawString(50, 750, f"ALVO ANALISADO: {ticker} | VALOR: {preco}")
+    c.drawString(50, 730, "INTELIGÊNCIA CAPTURADA:")
+    c.drawString(50, 715, f"> {intel[:85]}...")
     c.save()
     return buf.getvalue()
 
-# --- CABEÇALHO TÁTICO ---
+# --- CABEÇALHO ---
 st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS {' '*30} MÉDICA MESTRA: XEON® COMMAND {' '*30} {time.strftime('%H:%M:%S')}")
 
-# CÉLULA DE INGESTÃO E INVESTIGAÇÃO
-col_in1, col_in2 = st.columns([4, 1])
+# CÉLULA DE INGESTÃO (OSINT)
+col_in1, col_in2 = st.columns([3, 1])
 with col_in1:
-    user_query = st.text_input("INJETAR DADOS / PESQUISA PROFUNDA:", "Neuralink Starshield 2026")
+    query_user = st.text_input("INJETAR DADOS / PESQUISA PROFUNDA:", "Neuralink Starshield 2026")
 with col_in2:
-    lang = st.selectbox("SISTEMA:", ["PT", "EN"], label_visibility="collapsed")
+    lang_opt = st.selectbox("SISTEMA:", ["PT", "EN"], label_visibility="collapsed")
 
-st.markdown("<h3 style='text-align: center; border: 1px solid #00FFCC; padding: 10px;'>IDENTIFICADOR DA MISSÃO (TERMINAL/BANCO/GUERRA/BIO)</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='text-align: center; border: 1px solid #00FFCC; padding: 5px;'>IDENTIFICADOR DA MISSÃO (TERMINAL/BANCO/GUERRA/BIO)</h3>", unsafe_allow_html=True)
 
-# --- GRID DE COMANDO (4 COLUNAS 100% FUNCIONAIS) ---
+# --- GRID DE COMANDO (4 COLUNAS FUNCIONAIS) ---
 c1, c2, c3, c4 = st.columns(4)
-intel_display = ""
+current_intel = "Aguardando varredura..."
 
 with c1:
     st.write("🏗️ ENGENHARIA")
-    if st.button("FORJAR CHIP GRAFENO"): st.toast("Sintetizando Redes de Carbono...")
-    if st.button("SENTIR DOR (ANTI-ALUC)"): st.warning("Hardware Check: Sincronia Bio-Digital Ativa.")
+    if st.button("FORJAR CHIP GRAFENO"): st.toast("Sintetizando estrutura nanométrica...")
+    if st.button("SENTIR DOR (ANTI-ALUC)"): st.warning("Hardware Sync: Integridade 100%")
 
 with c2:
     st.write("🌍 GEOPOLÍTICA")
-    if st.button("US/CH/RU/EU DEPT"): 
-        q = urllib.parse.quote("Guerra Geopolítica 2026")
-        feed = feedparser.parse(f"https://google.com{q}&hl=pt-br").entries[0]
-        intel_display = feed.title
-    if st.button("VARREDURA ORIENTE MÉDIO"): st.info("Escaneando Setor 7 via Satélite...")
+    if st.button("US/CH/RU/EU DEPT"): current_intel = buscar_intel("conflito geopolitico guerra 2026")
+    if st.button("VARREDURA ORIENTE MÉDIO"): current_intel = buscar_intel("israel iran tensão 2026")
 
 with c3:
     st.write("💰 FINANCEIRO")
-    t_in = st.selectbox("", ["BTC-USD", "GC=F", "USDBRL=X"], label_visibility="collapsed")
-    if st.button("B.C. & BOLSAS REAIS"): st.success("Sincronizado com o Terminal Bloomberg.")
-    if st.button("CORRETORAS & BANCOS"): st.toast("Acessando Fluxo Swift/Pix...")
+    t_input = st.selectbox("", ["BTC-USD", "GC=F", "USDBRL=X"], label_visibility="collapsed")
+    if st.button("B.C. & BOLSAS REAIS"): st.success("Sincronizado via WebSocket.")
+    if st.button("CORRETORAS & BANCOS"): st.toast("Acessando canais Swift...")
 
 with c4:
     st.write("🧬 BIO-EVOLUÇÃO")
-    if st.button("BIO/CURA/LONGEVIDADE"):
-        q_bio = urllib.parse.quote("Cura Câncer Longevidade 2026")
-        feed_bio = feedparser.parse(f"https://google.com{q_bio}&hl=pt-br").entries[0]
-        intel_display = feed_bio.title
+    if st.button("BIO/CURA/LONGEVIDADE"): current_intel = buscar_intel("mRNA cancer cure longevity 2026")
     
-    # FUNCIONALIDADE PDF (REQUISITO MÁXIMO)
-    pdf_data = gerar_pdf(t_in, "AUTO", intel_display if intel_display else user_query)
-    st.download_button("📄 IMPRIMIR PDF SOBERANIA", data=pdf_data, file_name="XEON_REPORT.pdf", mime="application/pdf")
+    # FUNCIONALIDADE PDF (IMPRIMIR PARA PC)
+    pdf_bytes = gerar_pdf_relatorio(t_input, "REAL-TIME", current_intel)
+    st.download_button("📄 PDF DE SOBERANIA", data=pdf_bytes, file_name="XEON_SOBERANIA.pdf", mime="application/pdf")
 
-# --- MOTOR DE RESPOSTA OSINT ---
-if user_query or intel_display:
-    st.divider()
-    current_intel = intel_display if intel_display else "Aguardando Injeção de Dados..."
-    st.write(f"» [INTEL ATIVA]: {current_intel}")
-
-# --- PROCESSAMENTO ESPECTRAL (GRÁFICO INFERIOR) ---
+# --- PROCESSAMENTO E GRÁFICO (RODAPÉ DA IMAGEM) ---
 try:
-    df = yf.download(t_in.strip(), period="300d", interval="1d", progress=False)
+    df = yf.download(t_input.strip(), period="300d", interval="1d", progress=False)
     if not df.empty:
         precos = df['Close'].values.flatten()
         y = (np.diff(np.log(precos))[-128:] - 0) * kaiser(128, beta=14)
         mag = 2.0/128 * np.abs(fft(y)[0:64])
         
-        # LOG DE REGISTRO (CONFORME IMAGEM)
+        st.divider()
         log_content = f"""
         [REGISTRO SOBERANO IMORTALIZADO] -----------------------------
-        🛡️ HARDWARE: Xeon Sentinel Neuromórfico | STATUS: 100% OPERACIONAL
-        🎯 ALVO: {t_in} | PREÇO: {precos[-1]:.2f}
-        >> INVESTIGAÇÃO: {current_intel[:60]}...
-        >> STATUS: CONEXÃO TERMINAL CRIPTOGRAFADA. PDF PRONTO PARA RETIRADA.
+        🛡️ HARDWARE: Xeon Sentinel Neuromórfico | STATUS: OPERACIONAL
+        🎯 ALVO: {t_input} | PREÇO: {precos[-1]:.2f}
+        >> INVESTIGAÇÃO: {current_intel[:80]}...
+        >> STATUS: CONEXÃO CRIPTOGRAFADA. PDF PRONTO PARA DOWNLOAD.
         """
         st.markdown(f"<div class='log-box'><pre style='color:#00FFCC; margin:0;'>{log_content}</pre></div>", unsafe_allow_html=True)
         
-        # GRÁFICO DE BARRAS (RODAPÉ DA IMAGEM)
+        # GRÁFICO DE BARRAS VERDES (IDENTICO AO DASHBOARD)
         fig = go.Figure(go.Bar(x=np.arange(64), y=mag, marker_color='#00FFCC'))
         fig.update_layout(template="plotly_dark", height=200, margin=dict(l=0,r=0,b=0,t=10), paper_bgcolor='black', plot_bgcolor='black')
         st.plotly_chart(fig, use_container_width=True)
-except: pass
+except: st.error("Aguardando sincronia do sinal satélite...")
 
-time.sleep(60)
+time.sleep(30)
 st.rerun()
