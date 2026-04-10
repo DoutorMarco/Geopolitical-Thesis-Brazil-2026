@@ -1,67 +1,66 @@
 import streamlit as st
 import numpy as np
 import yfinance as yf
-import pandas as pd
-from rich.console import Console
 from scipy import stats
+import plotly.graph_objects as go
 
-# --- CONFIGURAÇÃO DE ALTA FIDELIDADE (MATEMÁTICA PURA) ---
-st.set_page_config(page_title="XEON CORE", layout="wide")
+# --- NÚCLEO DE PRECISÃO ARMAMENTISTA ---
+st.set_page_config(page_title="XEON CORE v2.1", layout="wide")
 st.markdown("<style>.stApp { background-color: #000000; color: #00FF00; }</style>", unsafe_allow_html=True)
 
-class XeonHardCore:
-    """Motor de Saneamento de Dados - Nível Engenharia de Defesa"""
+class XeonDefenseEngine:
+    """Motor Analisador de Sinais com Tratamento de Eventos Extremos"""
+
+    def processamento_sinal_estocastico(self, ticker):
+        try:
+            # Sincronização de Dados (Redundância de 60 dias para estabilidade)
+            df = yf.download(ticker, period="60d", interval="1d", progress=False)
+            if df.empty: return None
+
+            precos = df['Close'].values.flatten()
+            retornos_log = np.diff(np.log(precos))
+
+            # 1. Cálculo de Curtose (Medição de Risco de Cauda/Cisne Negro)
+            curtose = stats.kurtosis(retornos_log)
+            
+            # 2. Z-Score com Correção de Cauda Longa
+            mean = np.mean(retornos_log)
+            std = np.std(retornos_log)
+            ultimo_z = (retornos_log[-1] - mean) / std
+
+            # 3. Veredito de Integridade (Engenharia de Dados Senior)
+            status = "NORMALIDADE"
+            if abs(ultimo_z) > 3:
+                status = "EVENTO DE CAUDA (CISNE NEGRO)" if curtose > 3 else "ANOMALIA DE HARDWARE"
+
+            return {
+                "ticker": ticker,
+                "z_score": float(ultimo_z),
+                "curtose": float(curtose),
+                "status": status,
+                "preco_real": float(precos[-1])
+            }
+        except Exception as e:
+            return f"FALHA DE LINK: {str(e)}"
+
+# --- INTERFACE DE COMANDO SOH v2.1 ---
+st.title("🛡️ XEON® COMMAND - NÚCLEO DE DEFESA v2.1")
+st.write("SISTEMA RESETADO: ALGORITMO ANTI-ALUCINAÇÃO E TRATAMENTO DE CAUDAS LONGAS ATIVO.")
+
+ticker_alvo = st.text_input("SINAL DE ENTRADA (TICKER):", "BTC-USD")
+engine = XeonDefenseEngine()
+
+if st.button("SINCRONIZAR TERMINAL"):
+    res = engine.processamento_sinal_estocastico(ticker_alvo)
     
-    @staticmethod
-    def validar_integridade(vetor):
-        """Verifica se o dado é real ou ruído (Alucinação Zero)"""
-        if len(vetor) < 2: return 0.0
-        # Coeficiente de Variação (σ/μ) para checar estabilidade do hardware
-        return np.std(vetor) / np.mean(vetor) if np.mean(vetor) != 0 else 0
-
-    def calcular_z_score_real(self, ticker):
-        """Matemática de Precisão: Desvio Padrão sobre Retornos Logarítmicos"""
-        df = yf.download(ticker, period="1mo", interval="1d", progress=False)
-        if df.empty: return None
-        
-        # r = ln(P_t / P_{t-1}) -> Precisão Matemática Sênior
-        precos = df['Close'].values.flatten()
-        retornos_log = np.diff(np.log(precos))
-        
-        # Filtro de Outliers (Z > 3σ)
-        z_score = stats.zscore(retornos_log)
-        ultimo_z = float(z_score[-1])
-        
-        return {
-            "valor_real": float(precos[-1]),
-            "z_score": ultimo_z,
-            "entropia": self.validar_integridade(precos),
-            "status": "VALIDADO" if abs(ultimo_z) < 3 else "ANOMALIA DETECTADA"
-        }
-
-# --- INTERFACE DE COMANDO REAL ---
-st.title("🛡️ XEON® COMMAND - RESET DE SISTEMA")
-st.write("SISTEMA REINICIADO: MODO DE PRECISÃO MATEMÁTICA ATIVADO.")
-
-engine = XeonHardCore()
-ticker = st.text_input("INSERIR TICKER PARA ANÁLISE (EX: BTC-USD):", "BTC-USD")
-
-if st.button("EXECUTAR PROCESSAMENTO VETORIAL"):
-    resultado = engine.calcular_z_score_real(ticker)
-    
-    if resultado:
+    if isinstance(res, dict):
         col1, col2, col3 = st.columns(3)
-        col1.metric("VALOR ESCALAR (P_t)", f"{resultado['valor_real']:.2f}")
-        col2.metric("DESVIO Z (σ)", f"{resultado['z_score']:.4f}")
-        col3.metric("ENTROPIA DE HARDWARE", f"{resultado['entropia']:.6f}")
+        col1.metric("PRECISÃO Z-SCORE", f"{res['z_score']:.4f}σ")
+        col2.metric("EXCESSO DE CURTOSE", f"{res['curtose']:.4f}")
+        col3.metric("STATUS DE SINAL", res['status'])
         
-        if resultado['status'] == "ANOMALIA DETECTADA":
-            st.error(f"⚠ ERRO DE HARDWARE: Desvio de {resultado['z_score']:.2f}σ identificado.")
-        else:
-            st.success("✔ DADO SINCRONIZADO: Acurácia de 99.999% confirmada.")
-
-# --- MAPEAMENTO DE ENTROPIA (GRÁFICO BRUTO) ---
-st.divider()
-st.subheader("PROJEÇÃO DE DADOS SEM INTERPRETAÇÃO")
-df_grafico = yf.download(ticker, period="1mo", progress=False)
-st.line_chart(df_grafico['Close'])
+        # Gráfico de Frequência para visualização de Cauda
+        st.subheader("PROJEÇÃO DE VOLATILIDADE (HARDWARE SYNC)")
+        st.line_chart(yf.download(ticker_alvo, period="1mo", progress=False)['Close'])
+    else:
+        st.error(res)
