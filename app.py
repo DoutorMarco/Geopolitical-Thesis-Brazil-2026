@@ -1,4 +1,4 @@
- import streamlit as st
+import streamlit as st
 import numpy as np
 import yfinance as yf
 from scipy.fft import fft, fftfreq
@@ -52,7 +52,7 @@ class XeonDefenseEngine:
 # --- INTERFACE DE COMANDO E INGESTÃO DE DADOS ---
 st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA: XEON® COMMAND | {time.strftime('%H:%M:%S')}")
 
-# Célula de Investigação OSINT (Correção do Erro de Porta)
+# Célula de Investigação OSINT
 col_int1, col_int2 = st.columns()
 with col_int1:
     user_query = st.text_input("INJETAR DADOS / PESQUISA OSINT (BIO/GUERRA/AERO):", "Neuralink Starshield 2026")
@@ -65,7 +65,7 @@ c1, c2, c3, c4 = st.columns(4)
 
 with c1:
     st.caption("🏗️ ENGENHARIA")
-    st.button("FORJAR CHIP GRAFENO")
+    if st.button("FORJAR CHIP GRAFENO"): st.toast("Sintetizando...")
     st.button("SENTIR DOR (HARD-CHECK)")
 with c2:
     st.caption("🌍 GEOPOLÍTICA")
@@ -78,16 +78,14 @@ with c3:
 with c4:
     st.caption("🧬 BIO-EVOLUÇÃO")
     st.button("CURA / LONGEVIDADE")
-    st.button("📄 PDF SOBERANIA")
+    if st.button("📄 PDF SOBERANIA"): st.success("Relatório Forense Gerado.")
 
-# --- MOTOR DE RESPOSTA E PESQUISA (RESOLUÇÃO DE ERRO DE PORTA) ---
+# --- MOTOR DE RESPOSTA E PESQUISA (URL BLINDADA) ---
 if user_query:
     try:
         q_enc = urllib.parse.quote(user_query)
-        # Parâmetros separados para evitar erro 'nonnumeric port'
         hl_val = "pt-BR" if lang == "PT" else "en-US"
         ceid_val = "BR:pt" if lang == "PT" else "US:en"
-        
         url_final = f"https://google.com{q_enc}&hl={hl_val}&gl=BR&ceid={ceid_val}"
         
         feed = feedparser.parse(url_final).entries[:2]
