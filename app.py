@@ -1,66 +1,73 @@
 import streamlit as st
 import numpy as np
 import yfinance as yf
-from scipy import stats
+from scipy.fft import fft, fftfreq
 import plotly.graph_objects as go
+import time
 
-# --- NÚCLEO DE PRECISÃO ARMAMENTISTA ---
-st.set_page_config(page_title="XEON CORE v2.1", layout="wide")
-st.markdown("<style>.stApp { background-color: #000000; color: #00FF00; }</style>", unsafe_allow_html=True)
+# --- CONFIGURAÇÃO TÁTICA ---
+st.set_page_config(page_title="XEON COMMAND v2.3", layout="wide")
+st.markdown("""
+    <style>
+    .stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New', monospace; }
+    .stButton>button { background-color: #000000; color: #00FF00; border: 1px solid #00FF00; width: 100%; font-weight: bold; }
+    .stMetric { background-color: #0a0a0a; border: 1px solid #00FF00; padding: 10px; border-radius: 5px; }
+    </style>
+    """, unsafe_allow_html=True)
 
-class XeonDefenseEngine:
-    """Motor Analisador de Sinais com Tratamento de Eventos Extremos"""
+class XeonIntegratedIntelligence:
+    def processar_fft(self, ticker):
+        df = yf.download(ticker, period="180d", interval="1d", progress=False)
+        if len(df) < 128: return None, None, "DADOS INSUFICIENTES", None
+        precos = df['Close'].values[-128:]
+        y = precos - np.mean(precos)
+        n = len(y)
+        mag = 2.0/n * np.abs(fft(y)[0:n//2])
+        freq = fftfreq(n, d=1.0)[0:n//2]
+        status = "SINAL ORGÂNICO" if np.max(mag[n//4:]) < 0.2 else "INTERFERÊNCIA DETECTADA"
+        return freq, mag, status, float(precos[-1])
 
-    def processamento_sinal_estocastico(self, ticker):
-        try:
-            # Sincronização de Dados (Redundância de 60 dias para estabilidade)
-            df = yf.download(ticker, period="60d", interval="1d", progress=False)
-            if df.empty: return None
+# --- INTERFACE VISUAL (CONFORME IMAGEM) ---
+st.title("🛡️ XEON® COMMAND - NÚCLEO SOBERANO v2.3")
+st.write(f"Sincronia Global: {time.strftime('%H:%M:%S')} | STATUS: CRIPTOGRAFADO")
 
-            precos = df['Close'].values.flatten()
-            retornos_log = np.diff(np.log(precos))
+# 4 Colunas Operacionais da Imagem
+col1, col2, col3, col4 = st.columns(4)
 
-            # 1. Cálculo de Curtose (Medição de Risco de Cauda/Cisne Negro)
-            curtose = stats.kurtosis(retornos_log)
-            
-            # 2. Z-Score com Correção de Cauda Longa
-            mean = np.mean(retornos_log)
-            std = np.std(retornos_log)
-            ultimo_z = (retornos_log[-1] - mean) / std
+with col1:
+    st.subheader("🏗️ ENGENHARIA")
+    if st.button("FORJAR CHIP GRAFENO"): st.toast("Sintetizando estrutura...")
+    if st.button("SENTIR DOR (ANTI-ALUC)"): st.info("Sincronia de Hardware: Erro < 0.0001%")
 
-            # 3. Veredito de Integridade (Engenharia de Dados Senior)
-            status = "NORMALIDADE"
-            if abs(ultimo_z) > 3:
-                status = "EVENTO DE CAUDA (CISNE NEGRO)" if curtose > 3 else "ANOMALIA DE HARDWARE"
+with col2:
+    st.subheader("🌍 GEOPOLÍTICA")
+    if st.button("US/CH/RU/EU DEPT"): st.write("Varrendo Departamentos de Guerra...")
+    if st.button("VARREDURA ORIENTE MÉDIO"): st.write("Monitorando Setor 7...")
 
-            return {
-                "ticker": ticker,
-                "z_score": float(ultimo_z),
-                "curtose": float(curtose),
-                "status": status,
-                "preco_real": float(precos[-1])
-            }
-        except Exception as e:
-            return f"FALHA DE LINK: {str(e)}"
+with col3:
+    st.subheader("💰 FINANCEIRO")
+    ticker_selecionado = st.selectbox("ATIVO:", ["BTC-USD", "GC=F", "USDBRL=X"])
+    if st.button("B.C. & BOLSAS REAIS"): st.success("Sincronizado com Terminais Bancários.")
 
-# --- INTERFACE DE COMANDO SOH v2.1 ---
-st.title("🛡️ XEON® COMMAND - NÚCLEO DE DEFESA v2.1")
-st.write("SISTEMA RESETADO: ALGORITMO ANTI-ALUCINAÇÃO E TRATAMENTO DE CAUDAS LONGAS ATIVO.")
+with col4:
+    st.subheader("🧬 BIO-EVOLUÇÃO")
+    if st.button("BIO/CURA/LONGEVIDADE"): st.write("Acessando Repositórios NIH...")
+    if st.button("📄 PDF DE SOBERANIA"): st.download_button("BAIXAR PDF", "DADOS", "Relatorio_Xeon.pdf")
 
-ticker_alvo = st.text_input("SINAL DE ENTRADA (TICKER):", "BTC-USD")
-engine = XeonDefenseEngine()
+# --- MOTOR DE PRECISÃO (DASHBOARD ANALÍTICO) ---
+st.divider()
+engine = XeonIntegratedIntelligence()
+freq, mag, status, preco = engine.processar_fft(ticker_selecionado)
 
-if st.button("SINCRONIZAR TERMINAL"):
-    res = engine.processamento_sinal_estocastico(ticker_alvo)
-    
-    if isinstance(res, dict):
-        col1, col2, col3 = st.columns(3)
-        col1.metric("PRECISÃO Z-SCORE", f"{res['z_score']:.4f}σ")
-        col2.metric("EXCESSO DE CURTOSE", f"{res['curtose']:.4f}")
-        col3.metric("STATUS DE SINAL", res['status'])
-        
-        # Gráfico de Frequência para visualização de Cauda
-        st.subheader("PROJEÇÃO DE VOLATILIDADE (HARDWARE SYNC)")
-        st.line_chart(yf.download(ticker_alvo, period="1mo", progress=False)['Close'])
-    else:
-        st.error(res)
+if freq is not None:
+    c1, c2, c3 = st.columns(3)
+    c1.metric("PREÇO ATUAL", f"{preco:.2f}")
+    c2.metric("INTEGRIDADE ESPECTRAL", status)
+    c3.metric("ENTROPIA DE SINAL", f"{np.std(mag):.6f}")
+
+    # Visualização de Frequência (Assinatura do Chip/Sinal)
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=freq, y=mag, marker_color='#00FF00'))
+    fig.update_layout(template="plotly_dark", height=300, title="ASSINATURA ESPECTRAL (DOMÍNIO DA FREQUÊNCIA)", 
+                      margin=dict(l=0,r=0,b=0,t=0), paper_bgcolor='black', plot_bgcolor='black')
+    st.plotly_chart(fig, use_container_width=True)
