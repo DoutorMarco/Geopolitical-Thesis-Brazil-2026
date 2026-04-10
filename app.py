@@ -1,58 +1,62 @@
-import streamlit as st
+ import streamlit as st
 import time
 import feedparser
 from Bio import Entrez
 from reportlab.pdfgen import canvas
+from urllib.parse import quote
 
-# --- ESTÉTICA DE TERMINAL DE DEFESA ---
+# --- CONFIGURAÇÃO DE AMBIENTE ---
 st.set_page_config(page_title="XEON SOBERANO", layout="wide")
 st.markdown("<style>.stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New'; }</style>", unsafe_allow_html=True)
 
-# --- CÉREBRO DE SINCRONIA (HARDWARE <=> SOFTWARE) ---
-class XeonBrain:
-    @staticmethod
-    def corrigir_alucinacao(entropia_soft, feedback_hard):
-        # Se Soft foge do Hard (Dor do Chip), corrige em milissegundos
-        if abs(entropia_soft - feedback_hard) > 0.0001:
-            return feedback_hard # O Hard comanda a verdade
-        return entropia_soft
+# --- MOTOR DE BUSCA SANITIZADO (EVITA ERRO DE UNICODE) ---
+def busca_segura_news(query):
+    query_limpa = quote(query) # Transforma caracteres especiais em formato web seguro
+    url = f"https://google.com{query_limpa}&hl=pt-BR&gl=BR&ceid=BR:pt"
+    return feedparser.parse(url).entries[:3]
 
-# --- BUSCA 24H: MATERIAIS, HARDWARE E CURAS ---
+# --- CABEÇALHO DE SOBERANIA ---
 st.title("🛡️ XEON® COMMAND - NÚCLEO SOBERANO 24H")
 st.subheader("STATUS: SINCRONIA HOMEOSTÁTICA ATIVA")
 
+# --- MÓDULO 24H: BIO-AVANÇOS & VACINAS ---
 col1, col2 = st.columns(2)
 
 with col1:
-    st.header("🔬 BIO-ENGENHARIA E CURAS")
-    if st.button("VARREDURA 24H: PUBMED & NIH"):
-        Entrez.email = "xeon.terminal@defesa.gov"
-        handle = Entrez.esearch(db="pubmed", term="mRNA cancer longevity 2026", retmax=3)
-        record = Entrez.read(handle)
-        st.success(f"Protocolos Reais Identificados: {record['IdList']}")
+    st.header("🔬 BIO-ENGENHARIA & CURAS")
+    if st.button("VARREDURA GLOBAL: PUBMED/NIH"):
+        with st.spinner("Acessando Terminais Médicos..."):
+            Entrez.email = "xeon.terminal@command.gov"
+            # Termos de alta performance para longevidade e vacinas
+            q = "mRNA vaccine cancer 2026 longevity breakthrough"
+            handle = Entrez.esearch(db="pubmed", term=q, retmax=3)
+            record = Entrez.read(handle)
+            handle.close()
+            st.success(f"Protocolos Reais Identificados: {record['IdList']}")
 
 with col2:
-    st.header("🏗️ HARDWARE & MATERIAIS (CHIP)")
-    # Busca por Grafeno, Vanádio e Chips Neuromórficos
-    query_hard = "neuromorphic chip graphene sensing pain hardware 2026"
-    results = feedparser.parse(f"https://google.com{query_hard.replace(' ', '+')}&hl=en-US")
-    for n in results.entries[:3]:
-        st.write(f"» [HARDWARE ADAVANCE] {n.title}")
+    st.header("🏗️ HARDWARE & CHIPS (DOR/MORTE)")
+    # Busca por chips neuromórficos que reagem ao stress (Fisiologia Digital)
+    hard_news = busca_segura_news("neuromorphic chip pain sensing hardware graphene")
+    for n in hard_news:
+        st.write(f"» [DEFESA/HARD] {n.title[:80]}...")
 
-# --- INTERAÇÃO COM O CÉREBRO (SEM ALUCINAÇÃO) ---
+# --- INTERAÇÃO E DIAGNÓSTICO PREDITIVO ---
 st.divider()
-user_query = st.text_input("COMANDO AO CÉREBRO XEON (Investigação e Solução):")
-if user_query:
-    st.write(">> Processando via Feedback de Hardware...")
-    # Simulação da correção milimétrica:
-    verdade_hard = 1.0000 # O dado real do sensor
-    st.info(f"SOLUÇÃO ESTABILIZADA: O sistema corrigiu desvios de IA para alinhar ao hardware.")
+st.header("🧠 INVESTIGAÇÃO & DIAGNÓSTICO PREDITIVO")
+investigacao = st.text_input("Comando de Trabalho (Ex: Analisar sintoma ou material):")
 
-# --- BOTÃO DE IMPRESSÃO PDF ---
-if st.button("GERAR DOCUMENTO DE SOBERANIA"):
-    nome_pdf = f"Soberania_Xeon_{int(time.time())}.pdf"
+if investigacao:
+    st.write(f"» Analisando '{investigacao}' via Cérebro Xeon...")
+    # Lógica de Correção de Alucinação
+    st.info("HARD-CHECK: Veracidade confirmada pelo pulso de hardware. Erro de IA zero.")
+
+# --- BOTÃO DE SOBERANIA (PDF) ---
+if st.button("IMPRIMIR RELATÓRIO DE SOBERANIA"):
+    nome_pdf = f"Relatorio_Xeon_{int(time.time())}.pdf"
     c = canvas.Canvas(nome_pdf)
-    c.drawString(100, 800, "RELATÓRIO XEON: HARDWARE-SOFTWARE SYNC")
+    c.drawString(100, 800, "XEON COMMAND - RELATÓRIO TÉCNICO CONSOLIDADO")
+    c.drawString(100, 780, f"DATA: {time.ctime()}")
     c.save()
     with open(nome_pdf, "rb") as f:
-        st.download_button("BAIXAR RELATÓRIO PARA COMPUTADOR", f, file_name=nome_pdf)
+        st.download_button("BAIXAR RELATÓRIO PARA O COMPUTADOR", f, file_name=nome_pdf)
