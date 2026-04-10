@@ -52,7 +52,7 @@ class XeonDefenseEngine:
 # --- INTERFACE DE COMANDO E INGESTÃO DE DADOS ---
 st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA: XEON® COMMAND | {time.strftime('%H:%M:%S')}")
 
-# Célula de Investigação OSINT (Correção de InvalidURL)
+# Célula de Investigação OSINT (Correção do Erro de Porta)
 col_int1, col_int2 = st.columns([4, 1])
 with col_int1:
     user_query = st.text_input("INJETAR DADOS / PESQUISA OSINT (BIO/GUERRA/AERO):", "Neuralink Starshield 2026")
@@ -80,13 +80,17 @@ with c4:
     st.button("CURA / LONGEVIDADE")
     st.button("📄 PDF SOBERANIA")
 
-# --- MOTOR DE RESPOSTA E PESQUISA (BLINDADO) ---
+# --- MOTOR DE RESPOSTA E PESQUISA (CORREÇÃO CIRÚRGICA) ---
 if user_query:
     try:
-        q_enc = urllib.parse.quote(user_query) # Sanitização de caracteres
-        ceid = "BR:pt" if lang == "PT" else "US:en"
-        hl = "pt-BR" if lang == "PT" else "en-US"
-        url_final = f"https://google.com{q_enc}&hl={hl}&gl=BR&ceid={ceid}"
+        q_enc = urllib.parse.quote(user_query)
+        # Ajuste de Parâmetros para evitar que 'pt' seja lido como porta
+        hl_param = "pt-BR" if lang == "PT" else "en-US"
+        gl_param = "BR"
+        ceid_param = "BR:pt" if lang == "PT" else "US:en"
+        
+        # URL reconstruída seguindo o padrão RFC do Google News
+        url_final = f"https://google.com{q_enc}&hl={hl_param}&gl={gl_param}&ceid={ceid_param}"
         
         feed = feedparser.parse(url_final).entries[:2]
         for n in feed: 
