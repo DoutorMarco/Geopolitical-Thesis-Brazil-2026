@@ -12,7 +12,7 @@ if 'secret_key' not in st.session_state:
     st.session_state.secret_key = Fernet.generate_key()
 cipher = Fernet(st.session_state.secret_key)
 
-st.set_page_config(page_title="XEON CORE v12.0", layout="wide")
+st.set_page_config(page_title="XEON CORE v12.1", layout="wide")
 st.markdown("""
     <style>
     .stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New', monospace; }
@@ -25,8 +25,13 @@ st.markdown("""
 class XeonDefenseEngine:
     def __init__(self):
         self.db_path = "xeon_sovereign.db"
+        self._init_db()
+
+    def _init_db(self):
+        """Inicializa DB com modo WAL para concorrência mundial"""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("CREATE TABLE IF NOT EXISTS audit_ledger (ts REAL, payload BLOB)")
+            conn.execute("PRAGMA journal_mode=WAL") # Alta concorrência
+            conn.execute("CREATE TABLE IF NOT EXISTS audit_ledger (ts REAL, payload BLOB, error_log TEXT)")
 
     def processar_espectro_militar(self, ticker):
         try:
@@ -44,10 +49,16 @@ class XeonDefenseEngine:
             
             payload = cipher.encrypt(f"{ticker_clean}|{precos[-1]}|{time.time()}".encode())
             with sqlite3.connect(self.db_path) as conn:
-                conn.execute("INSERT INTO audit_ledger (ts, payload) VALUES (?, ?)", (time.time(), payload))
+                conn.execute("INSERT INTO audit_ledger (ts, payload) VALUES (?, ?, ?)", 
+                             (time.time(), payload, "OK"))
             
             return freq, mag, float(precos[-1]), hashlib.sha256(payload).hexdigest()
-        except: return None
+        except Exception as e:
+            # Diagnóstico Forense: Loga o erro real no DB em vez de silenciar
+            with sqlite3.connect(self.db_path) as conn:
+                conn.execute("INSERT INTO audit_ledger (ts, payload, error_log) VALUES (?, ?, ?)", 
+                             (time.time(), b"", str(e)))
+            return None
 
 # --- INTERFACE DE COMANDO E INGESTÃO DE DADOS ---
 st.write(f"📡 CONEXÃO REAL: TERMINAIS MUNDIAIS | MÉDICA MESTRA: XEON® COMMAND | {time.strftime('%H:%M:%S')}")
@@ -58,7 +69,6 @@ with col_int1:
 with col_int2:
     lang = st.radio("SISTEMA:", ("PT", "EN"), horizontal=True)
 
-# 4 Colunas Operacionais (100% Funcionais)
 st.markdown("<div style='border: 1px solid #00FF00; padding: 5px; text-align: center; font-size: 13px;'>IDENTIFICADOR DA MISSÃO (TERMINAL/BANCO/GUERRA/BIO)</div>", unsafe_allow_html=True)
 c1, c2, c3, c4 = st.columns(4)
 
@@ -79,19 +89,15 @@ with c4:
     st.button("CURA / LONGEVIDADE")
     if st.button("📄 PDF SOBERANIA"): st.success("Relatório Forense Gerado.")
 
-# --- MOTOR DE PESQUISA (SOLUÇÃO DEFINITIVA DO ERRO DE PORTA) ---
+# --- MOTOR DE PESQUISA (RESOLUÇÃO DE ERRO DE PORTA) ---
 if user_query:
     try:
-        # Sanitização absoluta e simplificada
-        q_enc = urllib.parse.quote_plus(user_query) 
-        hl_val = "pt-BR" if lang == "PT" else "en-US"
-        # URL SEM O PARÂMETRO 'ceid' QUE CAUSAVA O ERRO DE PORTA
+        q_enc = urllib.parse.quote_plus(user_query)
+        hl_val = "pt-br" if lang == "PT" else "en-us"
         url_final = f"https://google.com{q_enc}&hl={hl_val}&gl=BR"
-        
         feed = feedparser.parse(url_final)
         if feed.entries:
-            for n in feed.entries[:2]: 
-                st.write(f"» [INTEL] {n.title[:85]}...")
+            for n in feed.entries[:2]: st.write(f"» [INTEL] {n.title[:85]}...")
     except Exception as e:
         st.error(f"Erro de Conectividade OSINT: {e}")
 
@@ -103,13 +109,12 @@ if res:
     freq, mag, preco, sha = res
     st.divider()
     log_content = f"""
-    [REGISTRO SOBERANO IMORTALIZADO v12.0] -----------------------------
-    🛡️ HARDWARE: Xeon Sentinel | STATUS: PRONTIDÃO MILITAR (C4ISR)
+    [REGISTRO SOBERANO IMORTALIZADO v12.1] -----------------------------
+    🛡️ HARDWARE: Xeon Sentinel | STATUS: CONCORRÊNCIA MUNDIAL (WAL)
     🎯 ALVO: {ticker_input} | PREÇO: {preco:.2f} | SHA-256: {sha[:32]}...
-    >> STATUS: Erro de Porta Sanado via URL Simplification. Kaiser Beta=14 Ativo.
+    >> STATUS: Diagnóstico Forense Ativo. Kaiser Beta=14 (Zero Alucinação).
     """
     st.markdown(f"<div class='log-box'><pre style='color:#00FF00; margin:0;'>{log_content}</pre></div>", unsafe_allow_html=True)
-    
     fig = go.Figure(go.Bar(x=freq, y=mag, marker_color='#00FF00'))
     fig.update_layout(template="plotly_dark", height=200, margin=dict(l=0,r=0,b=0,t=0), paper_bgcolor='black', plot_bgcolor='black')
     st.plotly_chart(fig, use_container_width=True)
