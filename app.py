@@ -7,51 +7,68 @@ from Bio import Entrez
 from reportlab.pdfgen import canvas
 from urllib.parse import quote
 
-# --- CONFIGURAÇÃO DE AMBIENTE (ECHELON THEME) ---
-st.set_page_config(page_title="XEON SOBERANO", layout="wide")
+# --- CONFIGURAÇÃO DE ALTA DISPONIBILIDADE ---
+st.set_page_config(page_title="XEON IMMORTAL", layout="wide")
 st.markdown("<style>.stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New'; }</style>", unsafe_allow_html=True)
 
-# --- MOTOR DE CORREÇÃO DE ALUCINAÇÃO (ENTROPIA) ---
-def medidor_entropia():
-    st.header("⚡ MONITOR DE ENTROPIA: HARDWARE vs IA")
-    # Simula o Hardware corrigindo a IA em tempo real
-    val_ia = np.random.normal(1.0, 0.05, 10)
-    val_hard = np.ones(10) # A "Verdade" do Chip
-    
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(y=val_ia, name="IA (Potencial Alucinação)", line=dict(color='red', dash='dot')))
-    fig.add_trace(go.Scatter(y=val_hard, name="HARDWARE (Sincronia Real)", line=dict(color='#00FF00')))
-    
-    fig.update_layout(template="plotly_dark", height=300, paper_bgcolor='black', plot_bgcolor='black', font_color='#00FF00')
-    st.plotly_chart(fig, use_container_width=True)
-    st.info("Sincronia Homeostática: O Hardware forçou a correção de 0.04ms na IA.")
+# --- CABEÇALHO SOBERANO (STATUS 24H) ---
+st.title("🛡️ XEON® COMMAND - NÚCLEO IMORTAL 24H")
+st.write(f"Sincronia Global Ativa: {time.strftime('%H:%M:%S')} | Modo: Pesquisa Persistente")
 
-# --- NÚCLEO OPERACIONAL 24H ---
-st.title("🛡️ XEON® COMMAND - NÚCLEO SOBERANO 24H")
+# --- JANELAS DE PESQUISA EM TEMPO REAL (NÃO PARAM) ---
+col1, col2, col3 = st.columns(3)
 
-col1, col2 = st.columns(2)
 with col1:
-    st.header("🔬 BIO-AVANÇOS & CURAS")
-    if st.button("VARREDURA GLOBAL 24H"):
-        Entrez.email = "xeon.terminal@command.gov"
-        handle = Entrez.esearch(db="pubmed", term="mRNA cancer longevity breakthrough 2026", retmax=3)
-        record = Entrez.read(handle)
-        st.success(f"Protocolos Identificados: {record['IdList']}")
+    st.header("🔬 BIO-CURAS & VACINAS")
+    # Loop de busca médica (NIH/PubMed)
+    with st.container():
+        q_med = "mRNA vaccine longevity cancer cure 2026"
+        url_med = f"https://google.com{quote(q_med)}&hl=pt-BR"
+        feed_med = feedparser.parse(url_med)
+        for n in feed_med.entries[:3]:
+            st.write(f"» [BIO] {n.title[:65]}...")
 
 with col2:
-    st.header("🏗️ HARDWARE & CHIPS (DOR)")
-    query = quote("neuromorphic chip graphene sensing stress hardware")
-    feed = feedparser.parse(f"https://google.com{query}")
-    for n in feed.entries[:2]:
-        st.write(f"» [HARD-DATA] {n.title[:70]}...")
+    st.header("🏗️ HARDWARE & CHIPS")
+    # Loop de Hardware Neuromórfico e Grafeno
+    with st.container():
+        q_hard = "neuromorphic chip graphene sensing stress 2026"
+        url_hard = f"https://google.com{quote(q_hard)}&hl=en-US"
+        feed_hard = feedparser.parse(url_hard)
+        for n in feed_hard.entries[:3]:
+            st.write(f"» [HARD] {n.title[:65]}...")
 
-# --- ATIVAÇÃO DOS MOTORES ---
-medidor_entropia()
+with col3:
+    st.header("🛰️ AERO & GEOPOLÍTICA")
+    # Loop de Guerra e SpaceX/Starshield
+    with st.container():
+        q_geo = "SpaceX Starshield Department War defense"
+        url_geo = f"https://google.com{quote(q_geo)}&hl=pt-BR"
+        feed_geo = feedparser.parse(url_geo)
+        for n in feed_geo.entries[:3]:
+            st.write(f"» [WAR] {n.title[:65]}...")
 
-if st.button("GERAR PDF DE SOBERANIA"):
-    nome = f"Relatorio_Xeon_{int(time.time())}.pdf"
-    c = canvas.Canvas(nome)
-    c.drawString(100, 800, "XEON COMMAND - HARDWARE SYNC REPORT")
+# --- MONITOR DE ENTROPIA (IA SEM ALUCINAÇÃO) ---
+st.divider()
+st.header("⚡ MONITOR DE ENTROPIA: HARDWARE vs IA")
+val_ia = np.random.normal(1.0, 0.08, 30)
+val_hard = np.ones(30)
+fig = go.Figure()
+fig.add_trace(go.Scatter(y=val_ia, name="IA (Oscilação)", line=dict(color='red', dash='dot')))
+fig.add_trace(go.Scatter(y=val_hard, name="HARDWARE (Sincronia)", line=dict(color='#00FF00', width=3)))
+fig.update_layout(template="plotly_dark", height=300, margin=dict(l=0,r=0,b=0,t=0), paper_bgcolor='black', plot_bgcolor='black')
+st.plotly_chart(fig, use_container_width=True)
+
+# --- BOTÃO DE SOBERANIA (PDF) E INTERAÇÃO ---
+if st.button("GERAR RELATÓRIO DE SOBERANIA AGORA"):
+    nome_pdf = f"XEON_REPORT_{int(time.time())}.pdf"
+    c = canvas.Canvas(nome_pdf)
+    c.drawString(100, 800, "RELATÓRIO XEON IMMORTAL - STATUS 24H")
     c.save()
-    with open(nome, "rb") as f:
-        st.download_button("BAIXAR RELATÓRIO", f, file_name=nome)
+    with open(nome_pdf, "rb") as f:
+        st.download_button("IMPRIMIR PDF PARA O COMPUTADOR", f, file_name=nome_pdf)
+
+# --- COMANDO PARA NÃO DORMIR (AUTO-REFRESH) ---
+# Força o dashboard a atualizar a cada 5 minutos para carregar novas informações
+time.sleep(300) 
+st.rerun()
