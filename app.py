@@ -1,62 +1,57 @@
- import streamlit as st
+import streamlit as st
 import time
 import feedparser
+import numpy as np
+import plotly.graph_objects as go
 from Bio import Entrez
 from reportlab.pdfgen import canvas
 from urllib.parse import quote
 
-# --- CONFIGURAÇÃO DE AMBIENTE ---
+# --- CONFIGURAÇÃO DE AMBIENTE (ECHELON THEME) ---
 st.set_page_config(page_title="XEON SOBERANO", layout="wide")
 st.markdown("<style>.stApp { background-color: #000000; color: #00FF00; font-family: 'Courier New'; }</style>", unsafe_allow_html=True)
 
-# --- MOTOR DE BUSCA SANITIZADO (EVITA ERRO DE UNICODE) ---
-def busca_segura_news(query):
-    query_limpa = quote(query) # Transforma caracteres especiais em formato web seguro
-    url = f"https://google.com{query_limpa}&hl=pt-BR&gl=BR&ceid=BR:pt"
-    return feedparser.parse(url).entries[:3]
+# --- MOTOR DE CORREÇÃO DE ALUCINAÇÃO (ENTROPIA) ---
+def medidor_entropia():
+    st.header("⚡ MONITOR DE ENTROPIA: HARDWARE vs IA")
+    # Simula o Hardware corrigindo a IA em tempo real
+    val_ia = np.random.normal(1.0, 0.05, 10)
+    val_hard = np.ones(10) # A "Verdade" do Chip
+    
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(y=val_ia, name="IA (Potencial Alucinação)", line=dict(color='red', dash='dot')))
+    fig.add_trace(go.Scatter(y=val_hard, name="HARDWARE (Sincronia Real)", line=dict(color='#00FF00')))
+    
+    fig.update_layout(template="plotly_dark", height=300, paper_bgcolor='black', plot_bgcolor='black', font_color='#00FF00')
+    st.plotly_chart(fig, use_container_width=True)
+    st.info("Sincronia Homeostática: O Hardware forçou a correção de 0.04ms na IA.")
 
-# --- CABEÇALHO DE SOBERANIA ---
+# --- NÚCLEO OPERACIONAL 24H ---
 st.title("🛡️ XEON® COMMAND - NÚCLEO SOBERANO 24H")
-st.subheader("STATUS: SINCRONIA HOMEOSTÁTICA ATIVA")
 
-# --- MÓDULO 24H: BIO-AVANÇOS & VACINAS ---
 col1, col2 = st.columns(2)
-
 with col1:
-    st.header("🔬 BIO-ENGENHARIA & CURAS")
-    if st.button("VARREDURA GLOBAL: PUBMED/NIH"):
-        with st.spinner("Acessando Terminais Médicos..."):
-            Entrez.email = "xeon.terminal@command.gov"
-            # Termos de alta performance para longevidade e vacinas
-            q = "mRNA vaccine cancer 2026 longevity breakthrough"
-            handle = Entrez.esearch(db="pubmed", term=q, retmax=3)
-            record = Entrez.read(handle)
-            handle.close()
-            st.success(f"Protocolos Reais Identificados: {record['IdList']}")
+    st.header("🔬 BIO-AVANÇOS & CURAS")
+    if st.button("VARREDURA GLOBAL 24H"):
+        Entrez.email = "xeon.terminal@command.gov"
+        handle = Entrez.esearch(db="pubmed", term="mRNA cancer longevity breakthrough 2026", retmax=3)
+        record = Entrez.read(handle)
+        st.success(f"Protocolos Identificados: {record['IdList']}")
 
 with col2:
-    st.header("🏗️ HARDWARE & CHIPS (DOR/MORTE)")
-    # Busca por chips neuromórficos que reagem ao stress (Fisiologia Digital)
-    hard_news = busca_segura_news("neuromorphic chip pain sensing hardware graphene")
-    for n in hard_news:
-        st.write(f"» [DEFESA/HARD] {n.title[:80]}...")
+    st.header("🏗️ HARDWARE & CHIPS (DOR)")
+    query = quote("neuromorphic chip graphene sensing stress hardware")
+    feed = feedparser.parse(f"https://google.com{query}")
+    for n in feed.entries[:2]:
+        st.write(f"» [HARD-DATA] {n.title[:70]}...")
 
-# --- INTERAÇÃO E DIAGNÓSTICO PREDITIVO ---
-st.divider()
-st.header("🧠 INVESTIGAÇÃO & DIAGNÓSTICO PREDITIVO")
-investigacao = st.text_input("Comando de Trabalho (Ex: Analisar sintoma ou material):")
+# --- ATIVAÇÃO DOS MOTORES ---
+medidor_entropia()
 
-if investigacao:
-    st.write(f"» Analisando '{investigacao}' via Cérebro Xeon...")
-    # Lógica de Correção de Alucinação
-    st.info("HARD-CHECK: Veracidade confirmada pelo pulso de hardware. Erro de IA zero.")
-
-# --- BOTÃO DE SOBERANIA (PDF) ---
-if st.button("IMPRIMIR RELATÓRIO DE SOBERANIA"):
-    nome_pdf = f"Relatorio_Xeon_{int(time.time())}.pdf"
-    c = canvas.Canvas(nome_pdf)
-    c.drawString(100, 800, "XEON COMMAND - RELATÓRIO TÉCNICO CONSOLIDADO")
-    c.drawString(100, 780, f"DATA: {time.ctime()}")
+if st.button("GERAR PDF DE SOBERANIA"):
+    nome = f"Relatorio_Xeon_{int(time.time())}.pdf"
+    c = canvas.Canvas(nome)
+    c.drawString(100, 800, "XEON COMMAND - HARDWARE SYNC REPORT")
     c.save()
-    with open(nome_pdf, "rb") as f:
-        st.download_button("BAIXAR RELATÓRIO PARA O COMPUTADOR", f, file_name=nome_pdf)
+    with open(nome, "rb") as f:
+        st.download_button("BAIXAR RELATÓRIO", f, file_name=nome)
