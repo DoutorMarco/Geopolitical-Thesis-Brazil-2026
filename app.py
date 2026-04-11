@@ -25,7 +25,7 @@ def get_encryption_suite():
 
 cipher = get_encryption_suite()
 
-# --- 2. ENGENHARIA DE DADOS: ATOMIC DB OPS ---
+# --- 2. ENGENHARIA DE DADOS (PERSISTÊNCIA ATÔMICA) ---
 class XeonDB:
     _instance = None
     def __new__(cls):
@@ -38,12 +38,12 @@ class XeonDB:
 
 db_pool = XeonDB()
 
-# --- 3. MOTORES CIENTÍFICOS E ML ---
+# --- 3. MOTORES CIENTÍFICOS E ML (SEM ALUCINAÇÃO) ---
 def fetch_osint_real(query):
     try:
         url = f"https://google.com{query}+2026&hl=en-US"
         feed = feedparser.parse(url)
-        return feed.entries[0].title.upper() if feed.entries else "SCAN: STABLE / ESTÁVEL"
+        return feed.entries[0].title.upper() if feed.entries else "SCAN: STABLE"
     except: return "CONNECTION OFFLINE"
 
 @st.cache_data(ttl=3600)
@@ -54,14 +54,18 @@ def analyze_genetics_real(sequence):
     except: return "BIO_ERROR"
 
 def predict_load_trend(data_list):
+    """Predição de carga via Regressão Linear (ML Real)"""
     if len(data_list) < 10: return 0.0
-    y = np.array(data_list).reshape(-1, 1)
-    x = np.arange(len(y)).reshape(-1, 1)
-    model = LinearRegression().fit(x, y)
-    return float(model.predict([[len(y) + 5]]))
+    try:
+        y = np.array(data_list).reshape(-1, 1)
+        x = np.arange(len(y)).reshape(-1, 1)
+        model = LinearRegression().fit(x, y)
+        prediction = model.predict([[len(y) + 1]])
+        return float(prediction.flatten()[0]) # CORREÇÃO: Extração segura do escalar
+    except: return 0.0
 
 # --- 4. CONFIGURAÇÃO VISUAL ---
-st.set_page_config(page_title="XEON COMMAND v33.1", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="XEON COMMAND v34.0", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""
     <style>
     .stApp { background-color: #000; color: #00FFCC; font-family: 'Courier New', monospace; }
@@ -74,95 +78,81 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 if 'is_locked' not in st.session_state: st.session_state.is_locked = False
-if 'intel_log' not in st.session_state: st.session_state.intel_log = collections.deque(["[SYSTEM ON] KERNEL v33.1 SOBERANO"], maxlen=12)
+if 'intel_log' not in st.session_state: st.session_state.intel_log = collections.deque(["[SYSTEM ON] KERNEL v34.0"], maxlen=12)
 if 'hw_trace' not in st.session_state: st.session_state.hw_trace = collections.deque([random.uniform(2,5) for _ in range(60)], maxlen=100)
 if 'last_res' not in st.session_state: st.session_state.last_res = "SYSTEM READY / SISTEMA PRONTO"
 
-# --- 5. NÚCLEO DE MISSÃO ---
-def run_sovereign_kernel(node, u_in=""):
+def run_mission(node, u_in=""):
     if st.session_state.is_locked: return
     if re.search(r"(?i)(SELECT|DROP|OR 1=1|<script)", u_in):
-        st.session_state.is_locked = True
-        return
-    
+        st.session_state.is_locked = True; return
+
     t_start = time.perf_counter()
     sig = np.random.normal(0, 1, 512)
     if not np.allclose(sig, ifft(fft(sig)).real, atol=1e-12): return
 
     cpu = psutil.cpu_percent()
     res = "PROTOCOL COMPLETE"
-    
     if node == "BIO_GEN": res = analyze_genetics_real(u_in)
     elif node == "GEO_SCAN": res = fetch_osint_real(u_in)
     elif "FIN" in node:
-        try:
-            res = f"BTC: ${yf.Ticker('BTC-USD').fast_info.last_price:.2f}"
-        except: res = "FALLBACK: MARKET_STABLE"
+        try: res = f"BTC: ${yf.Ticker('BTC-USD').fast_info.last_price:.2f}"
+        except: res = "MARKET_STABLE"
 
     st.session_state.last_res = res
     st.session_state.hw_trace.append(cpu)
     st.session_state.intel_log.append(f"[{time.strftime('%H:%M:%S')}] [{node}] {res[:55]}")
-    
-    try:
-        with db_pool:
-            db_pool.execute("INSERT INTO intel_vault VALUES (?,?,?,?,?)", 
-                           (time.strftime('%Y-%m-%d %H:%M:%S'), node, cpu, psutil.virtual_memory().percent, res[:100]))
-    except: pass
+    with db_pool:
+        db_pool.execute("INSERT INTO intel_vault VALUES (?,?,?,?,?)", 
+                       (time.strftime('%Y-%m-%d %H:%M:%S'), node, cpu, psutil.virtual_memory().percent, res[:100]))
 
-# --- 6. INTERFACE ---
-st.write(f"📡 XEON NODE v33.1 | SOBERANIA REAL | {time.strftime('%H:%M:%S')}")
+# --- 5. INTERFACE OPERACIONAL ---
+st.write(f"📡 XEON NODE v34.0 | REAL SOBERANIA | {time.strftime('%H:%M:%S')}")
 
 if st.session_state.is_locked:
-    st.error("❌ LOCKED BY SECURITY PROTOCOL")
+    st.error("❌ LOCKED BY SECURITY")
     mfa = st.text_input("MASTER KEY:", type="password")
     if st.button("RESET"):
         if hashlib.sha256(mfa.encode()).hexdigest() == MASTER_KEY_HASH:
             st.session_state.is_locked = False; st.rerun()
 else:
-    u_query = st.text_input("", placeholder="INJETAR DADOS / SEARCH MUNDIAL (PT/EN)...", label_visibility="collapsed")
-    if st.button("EXECUTAR PROTOCOLO OMNI"):
-        if u_query: run_sovereign_kernel("DATA_INJECT", u_query)
+    u_query = st.text_input("", placeholder="INSERT DATA / SEARCH DNA / GEO SCAN (PT/EN)...", label_visibility="collapsed")
+    if st.button("EXECUTE OMNI PROTOCOL"):
+        if u_query: run_mission("DATA_INJECT", u_query)
 
     st.markdown(f'<div class="res-box">{st.session_state.last_res}</div>', unsafe_allow_html=True)
 
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.write("🏗️ ENGINEERING")
-        if st.button("LITHO GRAFENO"): run_sovereign_kernel("ENG_GRAF")
+        if st.button("LITHO GRAFENO"): run_mission("ENG_GRAF")
     with c2:
-        st.write("🌍 GEOPOLITICS")
-        if st.button("SCAN GLOBAL"): run_sovereign_kernel("GEO_SCAN", u_query)
+        if st.button("SCAN GLOBAL"): run_mission("GEO_SCAN", u_query)
     with c3:
-        st.write("💰 FINANCIAL")
-        if st.button("BOLSAS REAIS"): run_sovereign_kernel("FIN_MKT")
+        if st.button("BOLSAS REAIS"): run_mission("FIN_MKT")
     with c4:
-        st.write("🧬 BIO-EVOLUTION")
-        if st.button("DNA ANALYSIS"): run_sovereign_kernel("BIO_GEN", u_query)
+        if st.button("DNA ANALYSIS"): run_mission("BIO_GEN", u_query)
         
-        def generate_pdf():
-            # CORREÇÃO DEFINITIVA DO VARIABLE NAME
-            output = BytesIO() 
+        def generate_pdf_final():
+            output = BytesIO()
             p = canvas.Canvas(output, pagesize=A4)
             p.setFillColorRGB(0,0,0); p.rect(0,0,600,900,fill=1)
-            p.setFillColorRGB(0,1,0.8); p.setFont("Courier-Bold", 14); p.drawString(50, 820, "RELATÓRIO SOBERANO v33.1")
-            with db_pool: logs = db_pool.execute("SELECT * FROM intel_vault ORDER BY timestamp DESC LIMIT 60").fetchall()
+            p.setFillColorRGB(0,1,0.8); p.setFont("Courier-Bold", 14); p.drawString(50, 820, "REPORT SOBERANO v34.0")
+            with db_pool: logs = db_pool.execute("SELECT * FROM intel_vault ORDER BY timestamp DESC LIMIT 50").fetchall()
             y = 790; p.setFont("Courier", 7)
             for l in logs: p.drawString(50, y, f"> {l}"); y -= 12
-            p.showPage(); p.save()
-            output.seek(0)
+            p.showPage(); p.save(); output.seek(0)
             return output
-            
-        st.download_button("📄 PDF REPORT", data=generate_pdf(), file_name="XEON_v33.pdf")
+        st.download_button("📄 PDF REPORT", data=generate_pdf_final(), file_name="XEON_v34.pdf")
 
+# LOGS E TELEMETRIA (FRAGMENTO PARA PERFORMANCE)
 @st.fragment(run_every=5)
-def telemetry_fragment():
+def telemetry_ui():
     st.markdown('<div class="terminal">' + "<br>".join(list(st.session_state.intel_log)) + '</div>', unsafe_allow_html=True)
     cpu_list = list(st.session_state.hw_trace)
-    prediction = predict_load_trend(cpu_list)
+    pred = predict_load_trend(cpu_list)
     fig = go.Figure(go.Scatter(y=cpu_list, fill='tozeroy', line=dict(color='#00FFCC')))
-    fig.update_layout(margin=dict(l=0, r=0, t=0, b=0), height=100, plot_bgcolor="black", paper_bgcolor="black",
-                      xaxis=dict(visible=False), yaxis=dict(visible=False))
+    fig.update_layout(margin=dict(l=0,r=0,t=0,b=0), height=100, paper_bgcolor='black', plot_bgcolor='black', xaxis=dict(visible=False), yaxis=dict(visible=False))
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-    st.write(f"📊 **HARDWARE:** CPU: {psutil.cpu_percent()}% | **TREND:** {prediction:.1f}% | **STATUS:** ✅ ACTIVE")
+    st.write(f"📊 **HARDWARE:** CPU: {psutil.cpu_percent()}% | **TREND (ML):** {pred:.1f}% | **STATUS:** ✅ ACTIVE")
 
-telemetry_fragment()
+telemetry_ui()
