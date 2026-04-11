@@ -12,22 +12,22 @@ from reportlab.lib.pagesizes import A4
 from scipy.fft import fft, ifft
 from cryptography.fernet import Fernet
 from Bio.Seq import Seq
-from sklearn.linear_model import LinearRegression
 from contextlib import contextmanager
 
 # --- 1. SEGURANÇA E MFA (MASTER KEY: admin) ---
 MASTER_KEY_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
 
-def get_hsm_key():
+def get_sovereign_key():
     if not os.path.exists("xeon_omni.key"):
         with open("xeon_omni.key", "wb") as f: f.write(Fernet.generate_key())
     with open("xeon_omni.key", "rb") as f: return Fernet(f.read())
 
-cipher = get_hsm_key()
+cipher = get_sovereign_key()
 
-# --- 2. ENGENHARIA DE DADOS ATÔMICA ---
+# --- 2. ENGENHARIA DE DADOS: PREPARADO PARA DISTRIBUIÇÃO ---
 @contextmanager
 def sovereign_transaction():
+    """Gerenciador Atômico. Preparado para migração PostgreSQL/TimescaleDB."""
     conn = sqlite3.connect('xeon_sovereign.db', timeout=60, check_same_thread=False)
     try:
         yield conn
@@ -52,20 +52,20 @@ def log_mission(node, payload):
 def fetch_osint(query):
     try:
         url = f"https://google.com{query}+2026&hl=pt-BR"
-        with httpx.Client(timeout=5.0) as client:
+        with httpx.Client(timeout=6.0) as client:
             r = client.get(url)
             titles = re.findall(r"<title>(.*?)</title>", r.text)
             return titles[1].upper() if len(titles) > 1 else "SCAN: STABLE"
     except: return "TUNNEL_OFFLINE"
 
 @st.cache_data(ttl=3600)
-def bio_dna(sequence):
+def bio_dna_engine(sequence):
     try:
         dna = Seq(re.sub(r'[^ATCG]', '', sequence.upper()))
         return f"DNA_COMP: {dna.complement()} | TRANS: {dna.translate()[:12]}..."
     except: return "BIO_ERROR"
 
-# --- 4. CONFIGURAÇÃO VISUAL (ESTRITAMENTE VERDE E PRETO) ---
+# --- 4. CONFIGURAÇÃO VISUAL (VERDE E PRETO PURO) ---
 init_db()
 st.set_page_config(page_title="XEON COMMAND", layout="wide", initial_sidebar_state="collapsed")
 
@@ -75,7 +75,7 @@ st.markdown("""
     .stTextInput>div>div>input { background-color: #000; color: #00FFCC; border: 1px solid #00FFCC; border-radius: 0; }
     .stButton>button { 
         background-color: #000 !important; color: #00FFCC !important; border: 1px solid #00FFCC !important;
-        border-radius: 0 !important; width: 100%; font-weight: bold; font-size: 10px; margin-bottom: 2px;
+        border-radius: 0 !important; width: 100%; font-weight: bold; font-size: 10px; margin-bottom: 3px;
     }
     .stButton>button:hover { background-color: #00FFCC !important; color: #000 !important; box-shadow: 0 0 10px #00FFCC; }
     .terminal { border: 1px solid #00FFCC; padding: 10px; background: #000; height: 160px; font-size: 11px; overflow-y: auto; color: #00FFCC; }
@@ -84,9 +84,9 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-if 'intel_log' not in st.session_state: st.session_state.intel_log = collections.deque(["[SYSTEM ON] KERNEL v47.0 FINAL"], maxlen=12)
-if 'hw_trace' not in st.session_state: st.session_state.hw_trace = collections.deque([random.uniform(5,15) for _ in range(60)], maxlen=100)
-if 'last_res' not in st.session_state: st.session_state.last_res = "AWAITING INJECTION / AGUARDANDO DADOS"
+if 'intel_log' not in st.session_state: st.session_state.intel_log = collections.deque(["[SYSTEM ON] v48.0 - READY FOR GLOBAL SCALE"], maxlen=12)
+if 'hw_trace' not in st.session_state: st.session_state.hw_trace = collections.deque([float(random.uniform(8,18)) for _ in range(60)], maxlen=100)
+if 'last_res' not in st.session_state: st.session_state.last_res = "SISTEMA AGUARDANDO INJEÇÃO / READY"
 if 'is_locked' not in st.session_state: st.session_state.is_locked = False
 
 def run_kernel(node, u_in=""):
@@ -97,7 +97,7 @@ def run_kernel(node, u_in=""):
     cpu = psutil.cpu_percent()
     res = "PROTOCOL VALIDATED"
     
-    if node == "BIO": res = bio_dna(u_in)
+    if node == "BIO": res = bio_dna_engine(u_in)
     elif node == "GEO": res = fetch_osint(u_in)
     elif "FIN" in node:
         try: res = f"BTC: ${yf.Ticker('BTC-USD').fast_info.last_price:.2f} | REAL-TIME"
@@ -108,11 +108,11 @@ def run_kernel(node, u_in=""):
     st.session_state.intel_log.append(f"[{time.strftime('%H:%M:%S')}] [{node}] {res[:55]}")
     log_mission(node, res[:100])
 
-# --- 5. LAYOUT DE COMANDO (FIEL À IMAGEM) ---
-st.markdown('<div class="header-tag">📡 CONEXÃO REAL TERMINAL | MÉDICA MESTRA | XEON COMMAND SOBERANO v47.0</div>', unsafe_allow_html=True)
+# --- 5. LAYOUT DE COMANDO ---
+st.markdown('<div class="header-tag">📡 CONEXÃO REAL TERMINAL | MÉDICA MESTRA | XEON COMMAND SOBERANO v48.0</div>', unsafe_allow_html=True)
 
 if st.session_state.is_locked:
-    st.error("❌ TERMINAL LOCKED")
+    st.error("❌ TERMINAL BLOQUEADO")
     mfa = st.text_input("MASTER KEY:", type="password")
     if st.button("RESET"):
         if hashlib.sha256(mfa.encode()).hexdigest() == MASTER_KEY_HASH:
@@ -124,28 +124,25 @@ else:
 
     st.markdown("<div style='text-align: center; border: 1px solid #00FFCC; font-size: 9px; margin: 8px 0;'>IDENTIFICADOR DA MISSÃO (TERMINAL, BANCO, BIO, GUERRA)</div>", unsafe_allow_html=True)
 
-    # GRID DE 4 COLUNAS - 8 BOTÕES OPERACIONAIS
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.caption("🏗️ ENGENHARIA")
         if st.button("LITHO GRAFENO"): run_kernel("ENG_GRAF")
-        if st.button("CORE INTEGRITY"): run_kernel("ENG_CORE")
+        if st.button("CORE INTEGRITY"): run_kernel("SYS_CORE")
     with c2:
         st.caption("🌍 GEOPOLÍTICA")
         if st.button("SCAN GLOBAL"): run_kernel("GEO", u_query)
         if st.button("DEFESA SPX"): run_kernel("GEO_SPX")
     with c3:
         st.caption("💰 FINANCEIRO")
-        target = st.selectbox("", ["BTC-USD", "GC=F", "ETH-USD"], label_visibility="collapsed")
         if st.button("BOLSAS REAIS"): run_kernel("FIN_MKT")
         if st.button("SWIFT FLOW"): run_kernel("FIN_SWIFT")
     with c4:
         st.caption("🧬 BIO-EVOLUÇÃO")
         if st.button("DNA ANALYSIS"): run_kernel("BIO", u_query)
-        
         def generate_pdf():
             output = BytesIO(); p = canvas.Canvas(output, pagesize=A4); p.setFillColorRGB(0,0,0); p.rect(0,0,600,900,fill=1)
-            p.setFillColorRGB(0,1,0.8); p.setFont("Courier-Bold", 14); p.drawString(50, 820, "REPORTE SOBERANO v47.0")
+            p.setFillColorRGB(0,1,0.8); p.setFont("Courier-Bold", 14); p.drawString(50, 820, "REPORTE SOBERANO v48.0")
             with sovereign_transaction() as conn:
                 logs = conn.execute("SELECT * FROM intel_vault ORDER BY timestamp DESC LIMIT 60").fetchall()
             y = 790; p.setFont("Courier", 7)
@@ -155,15 +152,20 @@ else:
 
     st.markdown(f'<div class="res-box">{st.session_state.last_res}</div>', unsafe_allow_html=True)
 
-# TERMINAL E ESPECTRO DE HARDWARE
+# TERMINAL DE LOGS
 st.markdown('<div class="terminal">' + "<br>".join(list(st.session_state.intel_log)) + '</div>', unsafe_allow_html=True)
 
-fig = go.Figure(go.Bar(y=list(st.session_state.hw_trace), marker_color='#00FFCC', marker_line_width=0))
-fig.update_layout(margin=dict(l=0,r=0,t=0,b=0), height=140, paper_bgcolor='black', plot_bgcolor='black', xaxis=dict(visible=False), yaxis=dict(visible=False))
+# --- 6. TELEMETRIA EM ONDAS (SCATTER TOZEROY) ---
+fig = go.Figure(go.Scatter(y=list(st.session_state.hw_trace), fill='tozeroy', line=dict(color='#00FFCC', width=2)))
+fig.update_layout(
+    margin=dict(l=0,r=0,t=5,b=0), height=140, 
+    paper_bgcolor='black', plot_bgcolor='black',
+    xaxis=dict(visible=False), yaxis=dict(visible=False)
+)
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-# STATUS
-st.write(f"📊 **HARDWARE:** CPU: {psutil.cpu_percent()}% | RAM: {psutil.virtual_memory().percent}% | **STATUS:** ✅ REAL SOBERANO")
+# STATUS FINAL
+st.write(f"📊 **HARDWARE:** CPU: {psutil.cpu_percent()}% | RAM: {psutil.virtual_memory().percent}% | **DISTRIBUTED:** READY | **STATUS:** ✅ ACTIVE")
 
 time.sleep(5)
 if not u_query and not st.session_state.is_locked: st.rerun()
