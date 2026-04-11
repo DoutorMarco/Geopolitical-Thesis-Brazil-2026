@@ -1,19 +1,31 @@
+ # --- CORE UI & ENGINE ---
 streamlit
-yfinance
+plotly
+
+# --- DATA ENGINEERING & MATH (PRECISÃO SOBERANA) ---
 pandas
 numpy
-twilio
-biopython
-reportlab
-feedparser
-plotly
 scipy
-cryptography
-requests
-lxml
 scikit-learn
 statsmodels
-psutil
-aiohttp
+
+# --- INTELIGÊNCIA GLOBAL & OSINT (ASYNC READY) ---
+feedparser
 beautifulsoup4
+httpx
+requests
+aiohttp
+lxml
+yfinance
+
+# --- BIO-FISIOLOGIA DIGITAL ---
+biopython
+
+# --- SEGURANÇA, ALERTAS & AMBIENTE ---
+cryptography
 python-dotenv
+twilio
+
+# --- HARDWARE TELEMETRY & REPORTING ---
+psutil
+reportlab
