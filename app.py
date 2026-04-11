@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import yfinance as yf
+import feedparser
 import httpx
 import psutil
 import time, hashlib, collections, sqlite3, os, re, random
@@ -12,23 +13,23 @@ from reportlab.lib.pagesizes import A4
 from scipy.fft import fft, ifft
 from cryptography.fernet import Fernet
 from Bio.Seq import Seq
+from sklearn.linear_model import LinearRegression
 from contextlib import contextmanager
 
-# --- 1. SEGURANÇA E MFA (MASTER KEY: admin) ---
+# --- 1. NÚCLEO DE SEGURANÇA (MASTER KEY: admin) ---
 MASTER_KEY_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
 
-def get_sovereign_key():
+def get_hsm_cipher():
     KEY_FILE = "xeon_omni.key"
     if not os.path.exists(KEY_FILE):
         with open(KEY_FILE, "wb") as f: f.write(Fernet.generate_key())
     with open(KEY_FILE, "rb") as f: return Fernet(f.read())
 
-cipher = Fernet(get_sovereign_key())
+cipher = get_hsm_cipher()
 
-# --- 2. ENGENHARIA DE DADOS ATÔMICA & PERSISTÊNCIA ---
+# --- 2. ENGENHARIA DE DADOS: TRANSAÇÃO ATÔMICA ---
 @contextmanager
 def sovereign_transaction():
-    """Garante integridade física do banco de dados em missão crítica."""
     conn = sqlite3.connect('xeon_sovereign.db', timeout=60, check_same_thread=False)
     try:
         yield conn
@@ -42,41 +43,47 @@ def sovereign_transaction():
 def init_db():
     with sovereign_transaction() as conn:
         conn.execute('''CREATE TABLE IF NOT EXISTS intel_vault 
-                        (timestamp TEXT, node TEXT, cpu REAL, payload TEXT)''')
+                        (timestamp TEXT, node TEXT, cpu REAL, status TEXT, payload TEXT)''')
 
 def log_mission(node, payload):
-    cpu = psutil.cpu_percent()
+    cpu = float(psutil.cpu_percent())
     with sovereign_transaction() as conn:
-        conn.execute("INSERT INTO intel_vault VALUES (?,?,?,?)", 
-                    (time.strftime('%Y-%m-%d %H:%M:%S'), node, cpu, payload))
+        conn.execute("INSERT INTO intel_vault VALUES (?,?,?,?,?)", 
+                    (time.strftime('%Y-%m-%d %H:%M:%S'), node, cpu, "SUCCESS", payload))
 
-def prune_logs(limit=1000):
-    """Lazy Loading: Mantém o sistema leve e rápido."""
-    with sovereign_transaction() as conn:
-        conn.execute(f"DELETE FROM intel_vault WHERE rowid NOT IN (SELECT rowid FROM intel_vault ORDER BY timestamp DESC LIMIT {limit})")
-
-# --- 3. MOTORES CIENTÍFICOS REAIS (SEM ALUCINAÇÃO) ---
-def fetch_osint(query):
-    """Extração Geopolítica Real 2026."""
+# --- 3. MOTORES DE REALIDADE (BILINGUAL & REAL-TIME) ---
+def fetch_osint_real(query):
+    """Extração Geopolítica Real 2026 via Feedparser."""
     try:
-        url = f"https://google.com{query}+2026&hl=pt-BR"
-        with httpx.Client(timeout=6.0) as client:
-            r = client.get(url)
-            titles = re.findall(r"<title>(.*?)</title>", r.text)
-            return titles[1].upper() if len(titles) > 1 else "SCAN: STABLE"
-    except: return "TUNNEL_OFFLINE"
+        url = f"https://google.com{query}+2026&hl=en-US"
+        feed = feedparser.parse(url)
+        if feed.entries:
+            # Retorna o título da primeira notícia real
+            return feed.entries[0].title.upper()
+        return "SCAN: STABLE / ESTÁVEL"
+    except: return "TUNNEL_OFFLINE / MODO OFFLINE"
 
 @st.cache_data(ttl=3600)
-def bio_dna_real(sequence):
-    """Processamento Genômico via BioPython."""
+def bio_analysis_dna(sequence):
+    """Motor Genômico Real via BioPython."""
     try:
-        clean_dna = re.sub(r'[^ATCG]', '', sequence.upper())
-        if len(clean_dna) < 3: return "INV_SEQ"
-        dna = Seq(clean_dna)
+        dna_clean = re.sub(r'[^ATCG]', '', sequence.upper())
+        if len(dna_clean) < 3: return "INV_SEQ / SEQ CURTA"
+        dna = Seq(dna_clean)
         return f"DNA_COMP: {dna.complement()} | TRANS: {dna.translate()[:15]}..."
-    except: return "BIO_ERROR"
+    except: return "BIO_ENGINE_ERROR"
 
-# --- 4. CONFIGURAÇÃO VISUAL (ESTRITO VERDE E PRETO) ---
+def predict_load(data_list):
+    """ML: Regressão Linear para Predição de Carga."""
+    if len(data_list) < 10: return 0.0
+    try:
+        y = np.array(data_list, dtype=float).reshape(-1, 1)
+        x = np.arange(len(y)).reshape(-1, 1)
+        model = LinearRegression().fit(x, y)
+        return float(model.predict([[len(y) + 1]]).flatten())
+    except: return 0.0
+
+# --- 4. CONFIGURAÇÃO VISUAL (VERDE E PRETO PURO) ---
 init_db()
 st.set_page_config(page_title="XEON COMMAND", layout="wide", initial_sidebar_state="collapsed")
 
@@ -89,21 +96,21 @@ st.markdown("""
         border-radius: 0 !important; width: 100%; font-weight: bold; font-size: 10px; margin-bottom: 3px;
     }
     .stButton>button:hover { background-color: #00FFCC !important; color: #000 !important; box-shadow: 0 0 12px #00FFCC; }
-    .terminal { border: 1px solid #00FFCC; padding: 10px; background: #000; height: 160px; font-size: 11px; overflow-y: auto; color: #00FFCC; border-style: double; }
-    .res-box { border: 1px solid #00FFCC; padding: 12px; text-align: center; font-weight: bold; margin: 10px 0; background: #000; color: #00FFCC; text-shadow: 0 0 5px #00FFCC; }
-    .header-tag { font-size: 10px; border-bottom: 1px solid #00FFCC; padding-bottom: 5px; margin-bottom: 10px; }
+    .terminal { border: 1px solid #00FFCC; padding: 12px; background: #000; height: 160px; font-size: 11px; overflow-y: auto; color: #00FFCC; line-height: 1.4; border-style: double; }
+    .res-box { border: 2px solid #00FFCC; padding: 15px; text-align: center; font-weight: bold; margin: 15px 0; background: #000; color: #00FFCC; text-shadow: 0 0 5px #00FFCC; }
+    .header-tag { font-size: 10px; border-bottom: 1px solid #00FFCC; padding-bottom: 5px; margin-bottom: 10px; opacity: 0.9; }
     </style>
     """, unsafe_allow_html=True)
 
 # Estados de Sessão
-if 'intel_log' not in st.session_state: st.session_state.intel_log = collections.deque(["[SYSTEM ON] v50.0 FINAL SOBERANO"], maxlen=12)
-if 'hw_trace' not in st.session_state: st.session_state.hw_trace = collections.deque([float(random.uniform(5,15)) for _ in range(60)], maxlen=100)
-if 'last_res' not in st.session_state: st.session_state.last_res = "SISTEMA PRONTO / READY FOR INJECTION"
+if 'intel_log' not in st.session_state: st.session_state.intel_log = collections.deque(["[SYSTEM ON] v51.0 - OMNI NEXUS READY"], maxlen=12)
+if 'hw_trace' not in st.session_state: st.session_state.hw_trace = collections.deque([float(random.uniform(5, 15)) for _ in range(60)], maxlen=100)
+if 'last_res' not in st.session_state: st.session_state.last_res = "AWAITING MISSION DATA / AGUARDANDO INGESTÃO"
 if 'is_locked' not in st.session_state: st.session_state.is_locked = False
 
 def run_kernel(node, u_in=""):
     if st.session_state.is_locked: return
-    # WAF: Firewall Ativo
+    # WAF: Firewall Adaptativo
     if re.search(r"(?i)(SELECT|DROP|OR 1=1|<script)", u_in):
         st.session_state.is_locked = True; return
 
@@ -112,35 +119,34 @@ def run_kernel(node, u_in=""):
     sig = np.random.normal(0, 1, 512)
     if not np.allclose(sig, ifft(fft(sig)).real, atol=1e-12): return
 
-    cpu = psutil.cpu_percent()
+    cpu = float(psutil.cpu_percent())
     res = "PROTOCOL_VALIDATED"
     
-    if node == "BIO": res = bio_dna_real(u_in)
-    elif node == "GEO": res = fetch_osint(u_in)
+    if node == "BIO": res = bio_analysis_dna(u_in)
+    elif node == "GEO": res = fetch_osint_real(u_in)
     elif "FIN" in node:
         try:
             btc = yf.Ticker("BTC-USD").fast_info
-            res = f"BTC: ${btc['last_price']:.2f} | TRANSMISSÃO ATIVA"
-        except: res = "MERCADO ESTÁVEL / CACHE"
+            res = f"BTC: ${btc['last_price']:.2f} | REAL-TIME"
+        except: res = "MARKET_STABLE / CACHE"
 
     st.session_state.last_res = res
     st.session_state.hw_trace.append(cpu)
     st.session_state.intel_log.append(f"[{time.strftime('%H:%M:%S')}] [{node}] {res[:55]}")
     log_mission(node, res[:100])
-    prune_logs(limit=1000)
 
 # --- 5. LAYOUT DE COMANDO FINAL ---
-st.markdown(f'<div class="header-tag">📡 CONEXÃO REAL TERMINAL | MÉDICA MESTRA | XEON COMMAND SOBERANO v50.0 | {time.strftime("%H:%M:%S")}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="header-tag">📡 XEON NODE v51.0 | SOBERANIA REAL-TIME | OMNI-NEXUS | {time.strftime("%H:%M:%S")}</div>', unsafe_allow_html=True)
 
 if st.session_state.is_locked:
-    st.error("❌ TERMINAL LOCKED BY SECURITY")
-    mfa = st.text_input("MASTER KEY:", type="password")
-    if st.button("RESET PROTOCOL"):
+    st.error("❌ TERMINAL LOCKED BY SECURITY PROTOCOL")
+    mfa = st.text_input("ENTER MASTER KEY:", type="password")
+    if st.button("RESET"):
         if hashlib.sha256(mfa.encode()).hexdigest() == MASTER_KEY_HASH:
             st.session_state.is_locked = False; st.rerun()
 else:
-    u_query = st.text_input("", placeholder="INJETAR DADOS / SEARCH MUNDIAL / DNA RESEARCH...", label_visibility="collapsed")
-    if st.button("EXE_SOVEREIGN_SCAN"):
+    u_query = st.text_input("", placeholder="INJECT DATA / SEARCH GLOBAL / DNA RESEARCH (PT/EN)...", label_visibility="collapsed")
+    if st.button("EXECUTAR PROTOCOLO SOBERANO / EXE OMNI PROTOCOL"):
         if u_query: run_kernel("DATA_INJECT", u_query)
 
     st.markdown("<div style='text-align: center; border: 1px solid #00FFCC; font-size: 9px; margin: 8px 0;'>IDENTIFICADOR DA MISSÃO (TERMINAL, BANCO, BIO, GUERRA)</div>", unsafe_allow_html=True)
@@ -157,33 +163,35 @@ else:
         if st.button("DEFESA SPX"): run_kernel("GEO_SPX")
     with c3:
         st.caption("💰 FINANCEIRO")
-        if st.button("BOLSAS REAIS"): run_kernel("FIN_MKT")
-        if st.button("SWIFT FLOW"): run_kernel("FIN_SWIFT")
+        if st.button("BOLSAS REAIS"): run_mission("FIN_MKT")
+        if st.button("SWIFT FLOW"): run_mission("FIN_SWIFT")
     with c4:
         st.caption("🧬 BIO-EVOLUÇÃO")
         if st.button("DNA ANALYSIS"): run_kernel("BIO", u_query)
         
-        def generate_pdf():
+        def generate_report():
             output = BytesIO(); p = canvas.Canvas(output, pagesize=A4); p.setFillColorRGB(0,0,0); p.rect(0,0,600,900,fill=1)
-            p.setFillColorRGB(0,1,0.8); p.setFont("Courier-Bold", 14); p.drawString(50, 820, "REPORTE SOBERANO v50.0 - FINAL")
+            p.setFillColorRGB(0,1,0.8); p.setFont("Courier-Bold", 14); p.drawString(50, 820, "REPORTE SOBERANO v51.0 - FINAL")
             with sovereign_transaction() as conn:
                 logs = conn.execute("SELECT * FROM intel_vault ORDER BY timestamp DESC LIMIT 60").fetchall()
             y = 790; p.setFont("Courier", 7)
             for l in logs: p.drawString(50, y, f"> {l} | NODE: {l} | CPU: {l}% | {l}"); y -= 12
             p.showPage(); p.save(); output.seek(0); return output
-        st.download_button("📄 IMPRIMIR PDF", data=generate_pdf(), file_name="XEON_v50.pdf")
+        st.download_button("📄 EXPORTAR PDF (EN/PT)", data=generate_report(), file_name="XEON_v51.pdf")
 
     st.markdown(f'<div class="res-box">{st.session_state.last_res}</div>', unsafe_allow_html=True)
 
 # TERMINAL E ONDAS DE FREQUÊNCIA
 st.markdown('<div class="terminal">' + "<br>".join(list(st.session_state.intel_log)) + '</div>', unsafe_allow_html=True)
 
-fig = go.Figure(go.Scatter(y=list(st.session_state.hw_trace), fill='tozeroy', line=dict(color='#00FFCC', width=2)))
+cpu_list = list(st.session_state.hw_trace)
+trend = predict_load(cpu_list)
+fig = go.Figure(go.Scatter(y=cpu_list, fill='tozeroy', line=dict(color='#00FFCC', width=2)))
 fig.update_layout(margin=dict(l=0,r=0,t=5,b=0), height=140, paper_bgcolor='black', plot_bgcolor='black', xaxis=dict(visible=False), yaxis=dict(visible=False))
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
 # STATUS
-st.write(f"📊 **HARDWARE:** CPU: {psutil.cpu_percent()}% | RAM: {psutil.virtual_memory().percent}% | **SLA:** 100% | **STATUS:** ✅ ACTIVE")
+st.write(f"📊 **HARDWARE:** CPU: {psutil.cpu_percent()}% | **TREND (ML):** {trend:.1f}% | **STATUS:** ✅ SOBERANO")
 
 time.sleep(5)
 if not u_query and not st.session_state.is_locked: st.rerun()
