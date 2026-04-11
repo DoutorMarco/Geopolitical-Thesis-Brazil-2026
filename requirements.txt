@@ -11,3 +11,9 @@ scipy
 cryptography
 requests
 lxml
+scikit-learn
+statsmodels
+psutil
+aiohttp
+beautifulsoup4
+python-dotenv
