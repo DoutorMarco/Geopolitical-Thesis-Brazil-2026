@@ -1,119 +1,131 @@
 import streamlit as st
 import numpy as np
+import psutil
 import time
+import asyncio
 import plotly.graph_objects as go
 from io import BytesIO
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+import datetime
 
-# 1. BLINDAGEM TOTAL - ELIMINAÇÃO CIRÚRGICA DE CORES PADRÃO
+# ==========================================
+# 1. BLINDAGEM VISUAL TOTAL (ZERO BRANCO)
+# ==========================================
 st.set_page_config(page_title="Nexus Supremo v1032", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
-    /* RESET GLOBAL DE CORES - FUNDO PRETO ABSOLUTO */
     :root { background-color: #000000 !important; }
-    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main, .stApp {
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], .main {
         background-color: #000000 !important;
         color: #00FF41 !important;
         font-family: 'Courier New', monospace;
     }
-
-    /* ELIMINAR BRANCO DO CHAT INPUT (BARRA INFERIOR DA IMAGEM) */
-    div[data-testid="stChatInput"] {
-        background-color: #000000 !important;
-        border: 1px solid #00FF41 !important;
-        border-radius: 0px !important;
-    }
-    div[data-testid="stChatInput"] > div {
-        background-color: #000000 !important;
-    }
-    textarea {
-        background-color: #000000 !important;
-        color: #00FF41 !important;
-        border: none !important;
-    }
-
-    /* BOTÕES TÉCNICOS QUADRADOS (IDÊNTICOS À IMAGEM) */
+    div[data-testid="stChatInput"] { background-color: #050505 !important; border-top: 1px solid #1E293B !important; }
+    textarea { background-color: #000000 !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; }
+    [data-testid="stMetricValue"] { color: #38BDF8 !important; font-size: 2rem !important; }
+    [data-testid="stMetricLabel"] { color: #00FF41 !important; }
     .stButton>button {
         background-color: #000000 !important;
-        color: #00FF41 !important;
-        border: 1px solid #00FF41 !important;
-        border-radius: 0px !important;
-        width: 100%;
-        height: 35px;
-        font-size: 0.7rem !important;
+        color: #38BDF8 !important;
+        border: 1px solid #38BDF8 !important;
+        height: 45px;
+        transition: 0.3s;
+        border-radius: 0px;
     }
-    .stButton>button:hover {
-        background-color: #00FF41 !important;
-        color: #000000 !important;
-    }
-
-    /* BOTÃO DE DOWNLOAD (ELIMINANDO O BRANCO) */
-    .stDownloadButton>button {
-        background-color: #000000 !important;
-        color: #00FF41 !important;
-        border: 1px solid #00FF41 !important;
-        border-radius: 0px !important;
-    }
-
-    /* BARRA DE LOG (IDENTIDADE VISUAL DA IMAGEM) */
-    .stInfo, div[role="alert"] {
-        background-color: #000000 !important;
-        color: #00FF41 !important;
-        border: 1px solid #00FF41 !important;
-        border-radius: 0px !important;
-    }
-
-    /* OCULTAR ELEMENTOS RESIDUAIS */
-    footer, header, [data-testid="stToolbar"] { visibility: hidden !important; }
-    hr { border-top: 1px solid #00FF41 !important; }
-    
-    /* SCROLLBARS BLACKOUT */
-    ::-webkit-scrollbar { width: 3px; background: #000000; }
-    ::-webkit-scrollbar-thumb { background: #00FF41; }
+    .stButton>button:hover { border-color: #00FF41 !important; color: #00FF41 !important; box-shadow: 0 0 15px #00FF41; }
+    footer, header, #MainMenu { visibility: hidden !important; }
+    hr { border-top: 1px solid #1E293B !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. INTERFACE FIEL À IMAGEM ENVIADA
-st.markdown("<h2 style='text-align: center; color: #00FF41; letter-spacing: 5px; margin-bottom: 0px;'>🛡️ NEXUS SUPREMO v1032</h2>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #00FF41; font-size: 0.6rem; margin-bottom: 30px;'>EXECUTAR PROTOCOLO SOBERANO / EXEC SOH PROTOCOL</p>", unsafe_allow_html=True)
+def speak(text):
+    st.components.v1.html(f"<script>window.speechSynthesis.speak(new SpeechSynthesisUtterance('{text}'));</script>", height=0)
 
-# Grade de Botões (Layout Fiel 4 colunas)
-c1, c2, c3, c4 = st.columns(4)
-with c1:
-    st.button("LATÊNCIA REDE")
-    st.button("CORE INTEGRITY")
-with c2:
-    st.button("SCAN XEON")
-    st.button("DEFESA SOH")
-with c3:
-    st.button("SINCRONIA")
-    st.button("RAFT FLOW")
-with c4:
-    st.button("TISS ANALYTICS")
-    # Download sem Branco
-    buf = BytesIO(); p = canvas.Canvas(buf); p.drawString(100, 750, "SOH v2.2"); p.save(); buf.seek(0)
-    st.download_button("📂 DOWNLOAD DATA", buf, "Audit.pdf", use_container_width=True)
+# ==========================================
+# 2. INTERFACE OPERACIONAL ORIGINAL
+# ==========================================
+st.markdown("<h1 style='text-align: center; color: #38BDF8; letter-spacing: 12px;'>🛡️ NEXUS SUPREMO v1032</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #00FF41; font-size: 0.8rem;'>ARQUITETURA DE ENGENHARIA SÊNIOR - MISSÃO CRÍTICA</p>", unsafe_allow_html=True)
 
-# Log de Status (Idêntico ao da imagem)
-st.info("STATUS: NOMINAL | SOBERANO ATIVO")
+# PAINEL SUPERIOR DE TELEMETRIA
+col_a, col_b, col_c, col_d = st.columns(4)
+with col_a:
+    st.metric("CPU CARGA", f"{psutil.cpu_percent()}%")
+with col_b:
+    st.metric("MEMÓRIA", f"{psutil.virtual_memory().percent}%")
+with col_c:
+    net_io = psutil.net_io_counters()
+    st.metric("TRÁFEGO REDE", f"{(net_io.bytes_sent + net_io.bytes_recv) / 1024 / 1024:.1f} MB")
+with col_d:
+    st.metric("STATUS SOH", "v2.2 ACTIVE")
 
-# 3. GRÁFICO DE PULSO NEURAL COM PREENCHIMENTO (SOH v2.2 STABILIZED)
-t = np.linspace(0, 10, 500)
-# Ondulação característica da sua imagem
-y = 0.2 * np.sin(1.5 * t + time.time()) + 0.1 * np.random.randn(500)
-fig = go.Figure(go.Scatter(x=t, y=y, line=dict(color='#00FF41', width=1.5), fill='tozeroy', fillcolor='rgba(0, 255, 65, 0.4)'))
-fig.update_layout(height=250, margin=dict(l=0,r=0,t=0,b=0), xaxis=dict(visible=False), 
-                  yaxis=dict(visible=False, range=[-1, 1]), paper_bgcolor='black', plot_bgcolor='black')
-st.plotly_chart(fig, use_container_width=True)
+st.divider()
 
-# Telemetria Inferior
-st.markdown("<p style='font-size: 0.6rem; color: #00FF41; text-align: left;'>▣ HARDWARE: CPU 32.5% | MEM 14.1% | STATUS: NOMINAL | SOH v2.2 STABILIZED</p>", unsafe_allow_html=True)
+# MAPA E TERMINAL DE COMANDO
+col_map, col_terminal = st.columns([1.5, 1])
 
-# 4. INPUT DE COMANDO (BLACKOUT TOTAL - SEM BRANCO EMBAIXO)
-cmd = st.chat_input("Insert Sovereign Command...")
-if cmd:
-    # Lógica de resposta direta para manter estabilidade
-    res = f"VETOR {cmd}: Auditado com 100% de Integridade."
-    st.success(res)
-    st.components.v1.html(f"<script>window.speechSynthesis.speak(new SpeechSynthesisUtterance('{res}'));</script>", height=0)
+with col_map:
+    map_fig = go.Figure(go.Scattergeo(
+        lat=[-2.3, 25.9, -15.7, 40.71, 35.68], 
+        lon=[-44.4, -97.1, -47.8, -74.00, 139.69],
+        text=["Alcântara", "Starbase", "Brasília HQ", "Global NY", "Tokyo Node"],
+        mode='markers+text', 
+        marker=dict(size=12, color='#38BDF8', symbol='diamond', line=dict(width=2, color='#00FF41'))
+    ))
+    map_fig.update_layout(
+        geo=dict(bgcolor='#000000', showland=True, landcolor='#050505', countrycolor='#1E293B', 
+                 projection_type='orthographic', showocean=False),
+        margin=dict(l=0,r=0,t=0,b=0), height=350, paper_bgcolor='rgba(0,0,0,0)'
+    )
+    st.plotly_chart(map_fig, use_container_width=True)
+
+with col_terminal:
+    st.write("### ⌨️ INGESTÃO DE COMANDO")
+    if cmd := st.chat_input("Executar Auditoria Xeon..."):
+        res = f"SISTEMA XEON: Auditoria em '{cmd}' finalizada. Vetor de integridade: 1.0."
+        st.session_state.last_res = res
+        speak(res)
+    
+    if 'last_res' in st.session_state:
+        st.info(f"**LOG:** {st.session_state.last_res}")
+
+# GRADE DE OPERAÇÕES EXPANDIDA
+st.write("### 🚀 MÓDULOS DE MISSÃO")
+btns = [
+    ("🚀 SPACEX", "SPACEX"), ("⚖️ LAW", "LAW"), ("🧠 NEURALINK", "NEURALINK"), 
+    ("🧬 BIOGENETICS", "BIOGENETICS"), ("📈 IPO GOLD", "IPO"), ("🏗️ ENG SÊNIOR", "ENGINEERING"),
+    ("🛡️ DEFESA CYBER", "CYBER"), ("📊 VALUATION", "IPO"), ("🌐 SOBERANIA", "SOH")
+]
+
+cols = st.columns(3)
+for i, (label, key) in enumerate(btns):
+    with cols[i % 3]:
+        if st.button(label, use_container_width=True):
+            res = f"MÓDULO {key}: Ativado. Sincronia 100%."
+            st.session_state.last_res = res
+            speak(res)
+
+# EXPORTAÇÃO E AUDITORIA PDF
+if 'last_res' in st.session_state:
+    st.divider()
+    buf = BytesIO()
+    p = canvas.Canvas(buf, pagesize=A4)
+    p.setFillColorRGB(0, 0, 0); p.rect(0, 0, 600, 900, fill=1)
+    p.setFillColorRGB(0, 1, 0.25)
+    p.setFont("Courier-Bold", 18); p.drawString(50, 800, "DOSSIÊ DE AUDITORIA CRÍTICA - NEXUS v1032")
+    p.save(); buf.seek(0)
+    st.download_button("📂 BAIXAR RELATÓRIO SOBERANO (PDF)", buf, "Nexus_Audit_Report.pdf", use_container_width=True)
+
+# PULSO DE SINCRONIA NEURAL
+st.divider()
+t = np.linspace(0, 10, 250)
+y = np.sin(t + time.time())
+fig_wave = go.Figure(go.Scatter(x=t, y=y, line=dict(color='#00FF41', width=1), fill='tozeroy', fillcolor='rgba(0, 255, 65, 0.1)'))
+fig_wave.update_layout(
+    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', 
+    height=120, margin=dict(l=0,r=0,t=0,b=0), 
+    xaxis=dict(visible=False), yaxis=dict(visible=False, range=[-2, 2])
+)
+st.plotly_chart(fig_wave, use_container_width=True)
