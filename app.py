@@ -10,8 +10,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 import datetime
 
-# --- [1. IDENTIDADE SOBERANA v360.0 - BLACKOUT TOTAL] ---
-st.set_page_config(page_title="NEXUS SUPREMO v360.0", layout="wide", initial_sidebar_state="collapsed")
+# --- [1. IDENTIDADE SOBERANA v370.0 - BLACKOUT TOTAL] ---
+st.set_page_config(page_title="NEXUS SUPREMO v370.0", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
@@ -32,7 +32,7 @@ st.markdown("""
 def speak(text):
     st.components.v1.html(f"<script>var u=new SpeechSynthesisUtterance('{text}');u.lang='en-US';u.rate=1.0;window.speechSynthesis.speak(u);</script>", height=0)
 
-# --- [2. MOTOR DE DOSSIÊ PQC (6 PÁGINAS - CONFORME ANEXO)] ---
+# --- [2. MOTOR DE DOSSIÊ PQC (6 PÁGINAS - FOCO LAW/EB-1A)] ---
 def generate_pqc_dossier(module_name):
     buf = BytesIO()
     p = canvas.Canvas(buf, pagesize=A4)
@@ -44,6 +44,7 @@ def generate_pqc_dossier(module_name):
         "EB-1A EVIDENCE", 
         "FINAL VERDICT"
     ]
+    # Hash de Integridade PQC (Ancorado no Tempo Real)
     q_hash = hashlib.sha384(f"PQC_{module_name}_{time.time()}".encode()).hexdigest().upper()
     
     for i, title in enumerate(sections):
@@ -59,7 +60,7 @@ def generate_pqc_dossier(module_name):
     return buf
 
 # --- [3. DASHBOARD OPERACIONAL] ---
-st.markdown("<h2 style='text-align: center; color: #38BDF8; letter-spacing: 10px;'>🛡️ NEXUS SUPREMO v360.0</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center; color: #38BDF8; letter-spacing: 10px;'>🛡️ NEXUS SUPREMO v370.0</h2>", unsafe_allow_html=True)
 
 c1, c2, c3, c4 = st.columns(4)
 with c1: st.metric("CPU LOAD", f"{psutil.cpu_percent()}%")
@@ -79,7 +80,7 @@ with col_map:
     rot = (time.time() % 360) * 0.8
     fig = go.Figure(go.Scattergeo(
         lat=[-2.3, 25.9, -15.7, 40.71, 35.68], lon=[-44.4, -97.1, -47.8, -74.00, 139.69],
-        text=["Alcantara", "Starbase", "Brasilia", "NY", "Tokyo"],
+        text=["Alcantara Node", "Starbase US", "Brasilia HQ", "NY Global", "Tokyo Node"],
         mode='markers+text', marker=dict(size=12, color='#38BDF8', symbol='diamond', line=dict(width=2, color='#00FF41'))
     ))
     fig.update_layout(geo=dict(bgcolor='rgba(0,0,0,0)', showland=True, landcolor='#050505', projection_type='orthographic', projection_rotation=dict(lon=rot, lat=20, roll=0)), margin=dict(l=0,r=0,t=0,b=0), height=450, paper_bgcolor='rgba(0,0,0,0)')
@@ -87,9 +88,9 @@ with col_map:
 
 with col_cmd:
     st.write("### ⌨️ COMMAND INGESTION")
-    query = st.text_area("Live Mission Command...", height=150, label_visibility="collapsed", key="v360_cmd")
-    if st.button("🚀 EXECUTE COMMAND"):
-        speak("Command executed. Quantum synchronization active.")
+    query = st.text_area("Analyze Law & Sovereign Parameters...", height=150, label_visibility="collapsed", key="v370_cmd")
+    if st.button("🚀 EXECUTE LEGAL AUDIT"):
+        speak("Legal audit initiated. Quantum synchronization active.")
 
 st.divider()
 
@@ -106,11 +107,11 @@ for i, (label, key) in enumerate(nodes):
         color_node = "#FFD700" if "GOLD" in label else "#00FF41"
         st.markdown(f"<div style='text-align:center; color:{color_node}; font-size:0.8rem; border-bottom:1px solid {color_node}; margin-bottom:5px;'>{label}</div>", unsafe_allow_html=True)
         if st.button(f"ACTIVATE {key}", key=f"btn_{key}", use_container_width=True):
-            speak(f"Node {label} engaged. Generating six-page PQC dossier.")
+            speak(f"Node {label} engaged. Generating six-page technical dossier.")
             st.session_state.pdf_data = generate_pqc_dossier(label)
             st.session_state.node_name = label
 
-# Só exibe o botão de download se os dados existirem (Evita o AttributeError)
+# Exibição do botão de download condicional para evitar erros de atributo
 if 'pdf_data' in st.session_state and 'node_name' in st.session_state:
     st.download_button(
         label=f"📥 DOWNLOAD {st.session_state.node_name} PQC DOSSIER", 
