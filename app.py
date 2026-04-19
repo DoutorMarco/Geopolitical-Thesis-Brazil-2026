@@ -10,8 +10,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 import datetime
 
-# --- [1. IDENTIDADE SOBERANA v350.0 - BLACKOUT TOTAL] ---
-st.set_page_config(page_title="NEXUS SUPREMO v350.0", layout="wide", initial_sidebar_state="collapsed")
+# --- [1. IDENTIDADE SOBERANA v360.0 - BLACKOUT TOTAL] ---
+st.set_page_config(page_title="NEXUS SUPREMO v360.0", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
@@ -51,7 +51,7 @@ def generate_pqc_dossier(module_name):
     return buf
 
 # --- [3. DASHBOARD OPERACIONAL] ---
-st.markdown("<h2 style='text-align: center; color: #38BDF8; letter-spacing: 10px;'>🛡️ NEXUS SUPREMO v350.0</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center; color: #38BDF8; letter-spacing: 10px;'>🛡️ NEXUS SUPREMO v360.0</h2>", unsafe_allow_html=True)
 
 c1, c2, c3, c4 = st.columns(4)
 with c1: st.metric("CPU LOAD", f"{psutil.cpu_percent()}%")
@@ -79,32 +79,38 @@ with col_map:
 
 with col_cmd:
     st.write("### ⌨️ COMMAND INGESTION")
-    query = st.text_area("Live Mission Command...", height=150, label_visibility="collapsed", key="v350_cmd")
+    query = st.text_area("Live Mission Command...", height=150, label_visibility="collapsed", key="v360_cmd")
     if st.button("🚀 EXECUTE COMMAND"):
         speak("Command executed. Quantum synchronization active.")
 
 st.divider()
 
-# --- [5. OS 9 NÓS DE MISSÃO (LOGICA CORRIGIDA)] ---
+# --- [5. OS 9 NÓS DE MISSÃO (LOGICA BLINDADA)] ---
 st.write("### 🚀 MISSION NODES (QUANTUM ENFORCED)")
 nodes = [
     ("🚀 SPACEX", "SPACEX"), ("⚖️ LAW", "LAW"), ("🧠 NEURALINK", "NEURALINK"),
     ("🧬 BIOGENETICS", "BIOGENETICS"), ("💰 IPO GOLD", "IPOGOLD"), ("🏗️ SENIOR ENG", "ENGINEERING"),
-    ("🛡️ CYBER DEFENSE", "CYBER"), ("📈 VALUATION", "VALUATION"), ("🌐 SOVEREIGNTY", "SOH")
+    ("🛡️ CYBER DEFENSE", "CYBER"), ("📈 VALUATION", "VALUATION"), ("🌐 SOBERANIA", "SOH")
 ]
 cols = st.columns(3)
 for i, (label, key) in enumerate(nodes):
     with cols[i % 3]:
-        # Correção do erro de variável: uso direto de 'label' para a condicional
         color_node = "#FFD700" if "GOLD" in label else "#00FF41"
         st.markdown(f"<div style='text-align:center; color:{color_node}; font-size:0.8rem; border-bottom:1px solid {color_node}; margin-bottom:5px;'>{label}</div>", unsafe_allow_html=True)
         if st.button(f"ACTIVATE {key}", key=f"btn_{key}", use_container_width=True):
             speak(f"Node {label} engaged. Quantum encryption active.")
-            st.session_state.pdf = generate_pqc_dossier(label)
-            st.session_state.n_active = label
+            # Armazena tudo no state de uma vez para evitar erro de atributo
+            st.session_state.pdf_data = generate_pqc_dossier(label)
+            st.session_state.node_name = label
 
-if 'pdf' in st.session_state:
-    st.download_button(f"📥 DOWNLOAD {st.session_state.n_active} PQC DOSSIER", st.session_state.pdf, f"NEXUS_PQC_{st.session_state.n_active}.pdf", use_container_width=True)
+# Só exibe o botão de download se os dados existirem (Evita o AttributeError)
+if 'pdf_data' in st.session_state and 'node_name' in st.session_state:
+    st.download_button(
+        label=f"📥 DOWNLOAD {st.session_state.node_name} PQC DOSSIER", 
+        data=st.session_state.pdf_data, 
+        file_name=f"NEXUS_PQC_{st.session_state.node_name}.pdf", 
+        use_container_width=True
+    )
 
 # --- [6. ONDA DE PULSO OPERACIONAL] ---
 @st.fragment(run_every=1)
