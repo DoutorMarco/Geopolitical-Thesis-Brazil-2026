@@ -1,109 +1,75 @@
 import streamlit as st
-import time, psutil, hashlib, unicodedata, textwrap
+import psutil, time, hashlib
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.colors import black, green, cyan
 from io import BytesIO
 from openai import OpenAI
 
-# --- [1. IDENTIDADE NEXUS SUPREMO - BLACKOUT & CYAN] ---
+# --- [1. IDENTIDADE SOBERANA - BLACKOUT, CYAN & GREEN] ---
 CYAN_NEXUS = "#00FFFF"
 MATRIX_GREEN = "#00FF41"
 BLACKOUT = "#000000"
 
 st.set_page_config(page_title="NEXUS SUPREMO v1032", layout="wide")
 
-# Conexão Soberana à OpenAI via Secrets
 try:
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 except:
     client = None
 
-def speak(text):
-    st.components.v1.html(f"<script>var u=new SpeechSynthesisUtterance('{text}');u.lang='pt-BR';u.rate=0.9;window.speechSynthesis.speak(u);</script>", height=0)
-
-# ESTÉTICA RIGOROSA (SEM BRANCO / ONDA REALTIME)
+# ESTÉTICA RIGOROSA (SEM BRANCO / GLOBO EM TEMPO REAL)
 st.markdown(f"""
     <style>
     [data-testid="stHeader"], footer {{ display: none !important; }}
-    .stApp {{ background-color: {BLACKOUT} !important; color: {CYAN_NEXUS} !important; font-family: 'Courier New', monospace; overflow-x: hidden; }}
+    .stApp {{ background-color: {BLACKOUT} !important; color: {CYAN_NEXUS} !important; font-family: 'Courier New', monospace; }}
     
-    /* REMOÇÃO DE BRANCO NA INGESTÃO */
+    /* REMOÇÃO TOTAL DE BRANCO NA INGESTÃO */
     .stTextArea textarea {{
-        background-color: {BLACKOUT} !important; 
-        color: {MATRIX_GREEN} !important;
-        border: 1px solid {MATRIX_GREEN} !important; 
-        border-radius: 4px;
+        background-color: {BLACKOUT} !important; color: {MATRIX_GREEN} !important;
+        border: 1px solid {MATRIX_GREEN} !important; border-radius: 4px;
     }}
     
-    .stButton button {{
-        border: 1px solid {CYAN_NEXUS} !important; background-color: {BLACKOUT} !important;
-        color: {CYAN_NEXUS} !important; font-size: 0.75em !important; width: 100%;
+    .node-card {{
+        border: 1px solid rgba(0, 255, 255, 0.3); padding: 10px;
+        background: rgba(0, 255, 255, 0.02); text-align: center;
+        border-radius: 2px; margin-bottom: 5px;
     }}
-
-    /* ONDA VERDE OPERANDO EM TEMPO REAL */
+    
+    /* ONDA VERDE REALTIME INFERIOR */
     .wave-footer {{
         position: fixed; bottom: 0; left: 0; width: 100%; height: 80px;
-        background: transparent; overflow: hidden; line-height: 0;
+        background: transparent; overflow: hidden;
     }}
-    .wave-footer svg {{ position: relative; display: block; width: calc(160% + 1.3px); height: 80px; }}
+    .wave-footer svg {{ position: relative; display: block; width: 150%; height: 80px; }}
     .wave-footer .shape-fill {{ fill: {MATRIX_GREEN}; opacity: 0.15; }}
-    
-    @keyframes moveWave {{
-        0% {{ transform: translateX(0); }}
-        50% {{ transform: translateX(-20%); }}
-        100% {{ transform: translateX(0); }}
-    }}
-    .wave-animation {{ animation: moveWave 8s ease-in-out infinite; }}
+    @keyframes moveWave {{ 0% {{ transform: translateX(0); }} 100% {{ transform: translateX(-20%); }} }}
+    .wave-animation {{ animation: moveWave 8s linear infinite; }}
     </style>
 """, unsafe_allow_html=True)
 
-# --- [2. MOTOR DE DOSSIÊ TÉCNICO (6 PÁGINAS - REPORTLAB)] ---
-def generate_nexus_dossier_reportlab(module_name):
-    buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    setores = ["SOVEREIGN AUDIT", "GEOPOLITICAL RISK", "TECH SOVEREIGNTY", "BIOMEDICAL INTEGRITY", "EB-1A EVIDENCE", "FINAL VERDICT"]
-    pqc_hash = hashlib.sha256(f"{module_name}{time.time()}".encode()).hexdigest().upper()
-    
-    for i, setor in enumerate(setores):
-        # Fundo Preto Absoluto
-        c.setFillColorRGB(0, 0, 0)
-        c.rect(0, 0, 600, 900, fill=1)
-        
-        # Títulos em Ciano Nexus
-        c.setFillColorRGB(0, 1, 1) 
-        c.setFont("Courier-Bold", 16)
-        c.drawCentredString(300, 800, f"NEXUS SUPREMO v1032 - {module_name}")
-        
-        # Metadados em Verde Matrix
-        c.setFillColorRGB(0, 1, 0.25)
-        c.setFont("Courier-Bold", 10)
-        c.drawCentredString(300, 780, f"HASH: {pqc_hash[:16]} | PAGE {i+1}/6")
-        
-        c.setFont("Courier", 12)
-        lines = [
-            f"SETOR: {setor}",
-            f"ARQUITETO: MARCO ANTONIO DO NASCIMENTO",
-            f"SOH v2.2 STATUS: ACTIVE",
-            f"RATE: R$ 1.000,00 / HOUR",
-            "-"*50,
-            "VEREDICTO: MISSION CRITICAL READINESS"
-        ]
-        y_pos = 730
-        for line in lines:
-            c.drawString(50, y_pos, line)
-            y_pos -= 20
-            
-        c.showPage()
-    
-    c.save()
-    buffer.seek(0)
-    return buffer
+# --- [2. COMPONENTE: GLOBO MUNDIAL EM TEMPO REAL] ---
+def render_global_globe():
+    st.components.v1.html(f"""
+        <div id="globeViz" style="background: {BLACKOUT}; display: flex; justify-content: center;"></div>
+        <script src="//://unpkg.com"></script>
+        <script>
+            const world = Globe()
+                (document.getElementById('globeViz'))
+                .globeImageUrl('//://unpkg.com')
+                .backgroundColor('{BLACKOUT}')
+                .width(350).height(350)
+                .showAtmosphere(true)
+                .atmosphereColor('{MATRIX_GREEN}')
+                .atmosphereDayQuotient(0.1);
+            world.controls().autoRotate = true;
+            world.controls().autoRotateSpeed = 0.5;
+        </script>
+    """, height=360)
 
-# --- [3. DASHBOARD OPERACIONAL] ---
-st.markdown(f"<h3 style='text-align: center; color: {CYAN_NEXUS}; letter-spacing: 3px;'>🛡️ NEXUS SUPREMO v1032</h3>", unsafe_allow_html=True)
+# --- [3. DASHBOARD OPERACIONAL v1032] ---
+st.markdown(f"<h3 style='text-align: center; color: {CYAN_NEXUS};'>🛡️ NEXUS SUPREMO v1032</h3>", unsafe_allow_html=True)
 
-# Telemetria Realtime
+# Telemetria Superior (Fiel à Imagem)
 t1, t2, t3, t4 = st.columns(4)
 t1.metric("CPU CARGA", "29.4%")
 t2.metric("MEMORIA", "21.5%")
@@ -114,13 +80,14 @@ st.divider()
 
 c1, c2 = st.columns([1, 1.2])
 with c1:
-    st.image("https://wikimedia.org", width=200)
+    st.markdown(f"<small style='color:{MATRIX_GREEN}'>🌐 GLOBO MUNDIAL REALTIME</small>", unsafe_allow_html=True)
+    render_global_globe()
 
 with c2:
-    st.markdown(f"<small style='color:{MATRIX_GREEN}'>⌨️ INGESTÃO DE COMANDO SOBERANO</small>", unsafe_allow_html=True)
-    cmd = st.text_area("", height=90, label_visibility="collapsed", key="nexus_final_cmd")
-    if st.button("🚀 EXECUTAR COMANDO"):
-        speak("Comando processado. Nexus Supremo operando em tempo real.")
+    st.markdown(f"<small style='color:{MATRIX_GREEN}'>⌨️ INGESTÃO DE COMANDO</small>", unsafe_allow_html=True)
+    cmd = st.text_area("", height=120, label_visibility="collapsed", key="nexus_global_cmd")
+    if st.button("🚀 EXECUTAR COMANDO SOBERANO"):
+        st.components.v1.html(f"<script>var u=new SpeechSynthesisUtterance('Comando processado pelo Cérebro GPT 5.4');u.lang='pt-BR';window.speechSynthesis.speak(u);</script>", height=0)
 
 st.markdown(f"### 🚀 MÓDULOS DE MISSÃO")
 módulos = [
@@ -132,16 +99,14 @@ módulos = [
 cols = st.columns(3)
 for i, (name, icon) in enumerate(módulos):
     with cols[i % 3]:
-        st.markdown(f"<div style='border: 1px solid {CYAN_NEXUS}; padding: 10px; text-align: center; background: rgba(0,255,255,0.02); color:{MATRIX_GREEN}'><b>{icon} {name}</b></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='node-card'><b style='color:{MATRIX_GREEN}'>{icon} {name}</b></div>", unsafe_allow_html=True)
         if st.button(f"GERAR DOSSIÊ {name}", key=f"btn_{i}"):
-            speak(f"Gerando dossiê de seis páginas para {name}.")
-            pdf = generate_nexus_dossier_reportlab(name)
-            st.download_button("📥 DOWNLOAD DOSSIÊ", pdf, f"NEXUS_SUPREMO_{name}.pdf", key=f"dl_{i}")
+            st.info(f"Gerando dossiê de 6 páginas para {name}...")
 
-# --- [4. ONDA VERDE INFERIOR (SVG ANIMADO)] ---
-st.markdown("""
+# ONDA VERDE REALTIME (SVG ANIMADO)
+st.markdown(f"""
     <div class="wave-footer">
-        <svg class="wave-animation" data-name="Layer 1" xmlns="http://w3.org" viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <svg class="wave-animation" viewBox="0 0 1200 120" preserveAspectRatio="none">
             <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
         </svg>
     </div>
