@@ -32,12 +32,20 @@ st.markdown("""
 def speak(text):
     st.components.v1.html(f"<script>var u=new SpeechSynthesisUtterance('{text}');u.lang='en-US';u.rate=1.0;window.speechSynthesis.speak(u);</script>", height=0)
 
-# --- [2. MOTOR DE DOSSIÊ PQC (6 PÁGINAS)] ---
+# --- [2. MOTOR DE DOSSIÊ PQC (6 PÁGINAS - CONFORME ANEXO)] ---
 def generate_pqc_dossier(module_name):
     buf = BytesIO()
     p = canvas.Canvas(buf, pagesize=A4)
-    sections = ["NIST AUDIT", "GLOBAL FINANCE", "PQC GOVERNANCE", "DIGITAL PHYSIOLOGY", "EB-1A EVIDENCE", "FINAL VERDICT"]
-    q_hash = hashlib.sha384(f"QUANTUM_{module_name}_{time.time()}".encode()).hexdigest().upper()
+    sections = [
+        "NIST AUDIT", 
+        "GLOBAL FINANCE", 
+        "PQC GOVERNANCE", 
+        "DIGITAL PHYSIOLOGY", 
+        "EB-1A EVIDENCE", 
+        "FINAL VERDICT"
+    ]
+    q_hash = hashlib.sha384(f"PQC_{module_name}_{time.time()}".encode()).hexdigest().upper()
+    
     for i, title in enumerate(sections):
         p.setFillColorRGB(0, 0, 0); p.rect(0, 0, 600, 900, fill=1)
         p.setFillColorRGB(0, 1, 0.25); p.setFont("Courier-Bold", 18)
@@ -90,7 +98,7 @@ st.write("### 🚀 MISSION NODES (QUANTUM ENFORCED)")
 nodes = [
     ("🚀 SPACEX", "SPACEX"), ("⚖️ LAW", "LAW"), ("🧠 NEURALINK", "NEURALINK"),
     ("🧬 BIOGENETICS", "BIOGENETICS"), ("💰 IPO GOLD", "IPOGOLD"), ("🏗️ SENIOR ENG", "ENGINEERING"),
-    ("🛡️ CYBER DEFENSE", "CYBER"), ("📈 VALUATION", "VALUATION"), ("🌐 SOBERANIA", "SOH")
+    ("🛡️ DEFESA CYBER", "CYBER"), ("📈 VALUATION", "VALUATION"), ("🌐 SOBERANIA", "SOH")
 ]
 cols = st.columns(3)
 for i, (label, key) in enumerate(nodes):
@@ -98,8 +106,7 @@ for i, (label, key) in enumerate(nodes):
         color_node = "#FFD700" if "GOLD" in label else "#00FF41"
         st.markdown(f"<div style='text-align:center; color:{color_node}; font-size:0.8rem; border-bottom:1px solid {color_node}; margin-bottom:5px;'>{label}</div>", unsafe_allow_html=True)
         if st.button(f"ACTIVATE {key}", key=f"btn_{key}", use_container_width=True):
-            speak(f"Node {label} engaged. Quantum encryption active.")
-            # Armazena tudo no state de uma vez para evitar erro de atributo
+            speak(f"Node {label} engaged. Generating six-page PQC dossier.")
             st.session_state.pdf_data = generate_pqc_dossier(label)
             st.session_state.node_name = label
 
