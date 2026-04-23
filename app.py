@@ -78,6 +78,10 @@ def live_hub():
     sp500 = ingestor.get_sp500()
     cpu, mem = ingestor.get_hardware()
     
+    # LÓGICA DE INTERVENÇÃO PREDITIVA (Calculada via carga sistêmica)
+    pred_status = "STABLE" if cpu < 70 else "CRITICAL INTERVENTION REQUIRED"
+    pred_action = "MAINTAINING DATA FLOW" if mem < 80 else "REDISTRIBUTING EDGE COMPUTE"
+    
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("CPU LOAD (REAL)", f"{cpu}%")
     c2.metric("MEMORIA (REAL)", f"{mem}%")
@@ -100,6 +104,8 @@ def live_hub():
 
     with col_t:
         st.write("### 🧠 COMMAND TERMINAL")
+        # Injeção da Lógica Preditiva nos Logs do Terminal
+        st.caption(f"PREDICTIVE LOG: {pred_status} | {pred_action}")
         st.caption(f"OSINT SIGNAL: {ingestor.get_latest_news()[:40]}...")
         cmd = st.text_area("Ingest Real Signals...", height=150, key="v470_cmd")
         if st.button("🚀 EXECUTE REAL-TIME SYNC"):
